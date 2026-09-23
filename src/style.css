@@ -28,21 +28,68 @@ button, input, textarea, select {
   font: inherit;
 }
 
+#app {
+  min-height: 100vh;
+}
+
 .app-shell {
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   padding: 32px 16px;
 }
 
-.page {
+.top-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.top-nav a,
+.nav-links a {
+  display: inline-block;
+  padding: 10px 14px;
+  border-radius: 999px;
+  text-decoration: none;
+  color: #1d4ed8;
+  background: #dbeafe;
+  font-weight: 600;
+}
+
+.page,
+.page-view {
   width: min(1100px, 100%);
   background: rgba(255, 255, 255, 0.92);
   border: 1px solid rgba(148, 163, 184, 0.2);
   border-radius: 24px;
   box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
   padding: 48px 24px;
+}
+
+.page-view {
+  text-align: center;
+}
+
+.page-view h1 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-size: clamp(2rem, 3vw, 2.8rem);
+}
+
+.page-view p {
+  color: #475569;
+  margin-bottom: 20px;
+}
+
+.nav-links {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .env-panel {

@@ -8,6 +8,11 @@
       </p>
     </section>
 
+    <section class="env-panel">
+      <p class="env-label">URL base del backend</p>
+      <strong>{{ apiUrl }}</strong>
+    </section>
+
     <section class="grid">
       <FeatureCard
         title="Estructura inicial"
@@ -27,4 +32,6 @@
 
 <script setup>
 import FeatureCard from '../components/FeatureCard.vue'
+
+const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 </script>

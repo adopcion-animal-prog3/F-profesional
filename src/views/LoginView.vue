@@ -52,7 +52,11 @@
 
 <script setup>
 import { computed, reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { apiLogin } from '../api/http'
+import { saveSession } from '../auth/session'
+
+const router = useRouter()
 
 const form = reactive({
   email: '',
@@ -98,9 +102,16 @@ const handleSubmit = async () => {
     }
 
     const response = await apiLogin(payload)
+    const token = response?.data?.token
+    const user = response?.data?.user || null
 
+    saveSession(token, user)
     successMessage.value = response?.data?.message || 'Inicio de sesión correcto.'
     form.password = ''
+
+    setTimeout(() => {
+      router.push('/dashboard')
+    }, 800)
   } catch (error) {
     const fallbackMessage =
       error?.response?.data?.message ||

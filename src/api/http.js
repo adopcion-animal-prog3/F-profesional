@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { getAuthorizationHeader } from '../auth/session'
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
@@ -6,6 +7,16 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json'
   }
+})
+
+apiClient.interceptors.request.use((config) => {
+  const authHeader = getAuthorizationHeader()
+
+  if (authHeader.Authorization) {
+    config.headers.Authorization = authHeader.Authorization
+  }
+
+  return config
 })
 
 apiClient.interceptors.response.use(

@@ -21,5 +21,6 @@ apiClient.interceptors.response.use(
 )
 
 export const apiHealthCheck = () => apiClient.get('/health')
+export const apiLogin = (credentials) => apiClient.post('/api/auth/login', credentials)
 
 export default apiClient

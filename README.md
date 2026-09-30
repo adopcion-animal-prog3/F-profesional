@@ -1,5 +1,5 @@
 # F-profesional 
 
-En este repositorio se realizara el frontend para todos los centros de adopción
+En este repositorio se realizara el frontend para todos los centros de adopciónn
 
 # INFO:

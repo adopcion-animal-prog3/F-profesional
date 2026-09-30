@@ -1,6 +1,18 @@
 const TOKEN_KEY = 'auth_token'
 const USER_KEY = 'auth_user'
 
+const getStorage = () => {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    return window.localStorage
+  }
+
+  if (typeof localStorage !== 'undefined') {
+    return localStorage
+  }
+
+  return null
+}
+
 const safeParse = (value) => {
   if (!value) return null
 
@@ -12,26 +24,28 @@ const safeParse = (value) => {
 }
 
 export const getStoredToken = () => {
-  if (typeof window === 'undefined') return null
-  return localStorage.getItem(TOKEN_KEY)
+  const storage = getStorage()
+  return storage ? storage.getItem(TOKEN_KEY) : null
 }
 
 export const getStoredUser = () => {
-  if (typeof window === 'undefined') return null
-  return safeParse(localStorage.getItem(USER_KEY))
+  const storage = getStorage()
+  return storage ? safeParse(storage.getItem(USER_KEY)) : null
 }
 
 export const isAuthenticated = () => Boolean(getStoredToken())
 
 export const saveSession = (token, user) => {
-  if (typeof window === 'undefined') return
+  const storage = getStorage()
+
+  if (!storage) return
 
   if (!token) {
     clearSession()
     return
   }
 
-  localStorage.setItem(TOKEN_KEY, token)
+  storage.setItem(TOKEN_KEY, token)
 
   if (user && typeof user === 'object') {
     const publicUser = {
@@ -41,17 +55,19 @@ export const saveSession = (token, user) => {
       role: user.role || null
     }
 
-    localStorage.setItem(USER_KEY, JSON.stringify(publicUser))
+    storage.setItem(USER_KEY, JSON.stringify(publicUser))
   } else {
-    localStorage.removeItem(USER_KEY)
+    storage.removeItem(USER_KEY)
   }
 }
 
 export const clearSession = () => {
-  if (typeof window === 'undefined') return
+  const storage = getStorage()
 
-  localStorage.removeItem(TOKEN_KEY)
-  localStorage.removeItem(USER_KEY)
+  if (!storage) return
+
+  storage.removeItem(TOKEN_KEY)
+  storage.removeItem(USER_KEY)
 }
 
 export const getSession = () => ({

@@ -14,6 +14,7 @@
             type="text"
             placeholder="Tu nombre completo"
             autocomplete="name"
+            :disabled="isSubmitting"
           />
         </div>
 
@@ -25,6 +26,7 @@
             type="email"
             placeholder="usuario@ejemplo.com"
             autocomplete="email"
+            :disabled="isSubmitting"
           />
         </div>
 
@@ -36,6 +38,7 @@
             type="password"
             placeholder="••••••••"
             autocomplete="new-password"
+            :disabled="isSubmitting"
           />
         </div>
 
@@ -47,6 +50,7 @@
             type="password"
             placeholder="Repite tu contraseña"
             autocomplete="new-password"
+            :disabled="isSubmitting"
           />
         </div>
 
@@ -57,8 +61,8 @@
           {{ successMessage }}
         </p>
 
-        <button type="submit" class="primary-button">
-          Crear cuenta
+        <button type="submit" class="primary-button" :disabled="isSubmitting">
+          {{ isSubmitting ? 'Creando cuenta...' : 'Crear cuenta' }}
         </button>
       </form>
 
@@ -71,6 +75,10 @@
 
 <script setup>
 import { reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { apiRegister } from '../api/http'
+
+const router = useRouter()
 
 const form = reactive({
   name: '',
@@ -81,6 +89,7 @@ const form = reactive({
 
 const errorMessage = ref('')
 const successMessage = ref('')
+const isSubmitting = ref(false)
 
 const validateForm = () => {
   const { name, email, password, confirmPassword } = form
@@ -111,17 +120,39 @@ const validateForm = () => {
   }
 }
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
+  if (isSubmitting.value) return
+
   errorMessage.value = ''
   successMessage.value = ''
 
   try {
     validateForm()
-    successMessage.value = 'Formulario válido. Pendiente de envío al backend.'
+
+    isSubmitting.value = true
+
+    const payload = {
+      name: form.name.trim(),
+      email: form.email.trim(),
+      password: form.password
+    }
+
+    const response = await apiRegister(payload)
+    successMessage.value = response?.data?.message || 'Usuario registrado correctamente.'
+
+    form.name = ''
+    form.email = ''
     form.password = ''
     form.confirmPassword = ''
+
+    setTimeout(() => {
+      router.push('/login')
+    }, 1200)
   } catch (error) {
-    errorMessage.value = error.message || 'Revisa los campos del formulario.'
+    const backendMessage = error?.response?.data?.message || error?.message
+    errorMessage.value = backendMessage || 'No se pudo completar el registro. Inténtalo de nuevo.'
+  } finally {
+    isSubmitting.value = false
   }
 }
 </script>

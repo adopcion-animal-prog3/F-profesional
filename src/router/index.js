@@ -5,6 +5,9 @@ import RegisterView from '../views/RegisterView.vue'
 import DashboardView from '../views/DashboardView.vue'
 import PetsView from '../views/PetsView.vue'
 import PetDetailView from '../views/PetDetailView.vue'
+import { isAuthenticated } from '../auth/session'
+
+const publicRoutes = ['login', 'registro']
 
 const routes = [
   {
@@ -20,28 +23,49 @@ const routes = [
   {
     path: '/dashboard',
     name: 'dashboard',
-    component: DashboardView
+    component: DashboardView,
+    meta: { requiresAuth: true }
   },
   {
     path: '/mascotas',
     name: 'mascotas',
-    component: PetsView
+    component: PetsView,
+    meta: { requiresAuth: true }
   },
   {
     path: '/mascotas/:id',
     name: 'mascota-detalle',
     component: PetDetailView,
-    props: true
+    props: true,
+    meta: { requiresAuth: true }
   },
   {
     path: '/',
-    redirect: '/login'
+    redirect: () => {
+      return isAuthenticated() ? '/dashboard' : '/login'
+    }
   }
 ]
 
 const router = createRouter({
   history: createWebHistory(),
   routes
+})
+
+router.beforeEach((to, from, next) => {
+  const needsAuth = to.matched.some((record) => record.meta.requiresAuth)
+
+  if (needsAuth && !isAuthenticated()) {
+    next({ name: 'login' })
+    return
+  }
+
+  if (publicRoutes.includes(to.name) && isAuthenticated()) {
+    next({ name: 'dashboard' })
+    return
+  }
+
+  next()
 })
 
 export default router

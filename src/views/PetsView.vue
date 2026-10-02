@@ -6,9 +6,12 @@
         <h1>Mascotas disponibles</h1>
       </div>
 
-      <button class="primary-button small-button" type="button" @click="loadPets" :disabled="isLoading">
-        {{ isLoading ? 'Cargando...' : 'Actualizar' }}
-      </button>
+      <div class="header-actions">
+        <router-link class="primary-button small-button" to="/mascotas/nueva">Nueva mascota</router-link>
+        <button class="primary-button small-button" type="button" @click="loadPets" :disabled="isLoading">
+          {{ isLoading ? 'Cargando...' : 'Actualizar' }}
+        </button>
+      </div>
     </div>
 
     <div v-if="isLoading" class="state-block loading-state">

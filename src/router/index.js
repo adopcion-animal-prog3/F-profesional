@@ -5,6 +5,7 @@ import RegisterView from '../views/RegisterView.vue'
 import DashboardView from '../views/DashboardView.vue'
 import PetsView from '../views/PetsView.vue'
 import PetDetailView from '../views/PetDetailView.vue'
+import PetCreateView from '../views/PetCreateView.vue'
 import { isAuthenticated } from '../auth/session'
 
 const publicRoutes = ['login', 'registro']
@@ -30,6 +31,12 @@ const routes = [
     path: '/mascotas',
     name: 'mascotas',
     component: PetsView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/mascotas/nueva',
+    name: 'mascota-nueva',
+    component: PetCreateView,
     meta: { requiresAuth: true }
   },
   {

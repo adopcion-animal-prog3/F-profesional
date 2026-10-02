@@ -167,4 +167,58 @@ export const apiGetPetById = async (petId) => {
   }
 }
 
+export const apiUpdatePetById = async (petId, petData) => {
+  const payload = {
+    name: petData.name?.trim(),
+    species: petData.species?.trim(),
+    breed: petData.breed?.trim(),
+    age: Number(petData.age),
+    gender: petData.gender?.trim(),
+    status: petData.status?.trim() || 'Disponible',
+    location: petData.location?.trim(),
+    description: petData.description?.trim()
+  }
+
+  try {
+    const response = await apiClient.put(`/api/mascotas/${petId}`, payload)
+    return {
+      source: 'api',
+      data: normalizePetPayload(response.data)
+    }
+  } catch (error) {
+    const isOffline = typeof navigator !== 'undefined' && !navigator.onLine
+    const isNetworkFailure =
+      error?.code === 'ERR_NETWORK' ||
+      error?.message?.includes('Network') ||
+      isOffline
+
+    if (isNetworkFailure) {
+      const petIndex = demoPets.findIndex((item) => String(item.id) === String(petId))
+
+      if (petIndex === -1) {
+        throw new Error('La mascota no existe para actualizarla.')
+      }
+
+      const updatedPet = {
+        ...demoPets[petIndex],
+        ...payload,
+        id: Number(petId)
+      }
+
+      demoPets[petIndex] = updatedPet
+
+      return {
+        source: 'demo',
+        data: updatedPet
+      }
+    }
+
+    if (error?.response?.status === 404) {
+      throw new Error('La mascota no existe.')
+    }
+
+    throw error
+  }
+}
+
 export default apiClient

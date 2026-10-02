@@ -54,6 +54,8 @@ const pageTitle = computed(() => {
       return 'Registrar mascota'
     case 'mascota-detalle':
       return `Mascota #${route.params.id || ''}`
+    case 'mascota-editar':
+      return `Editar mascota #${route.params.id || ''}`
     default:
       return 'F-profesional'
   }

@@ -111,7 +111,9 @@
       </div>
 
       <div class="form-actions">
-        <button class="primary-button" type="submit">Guardar mascota</button>
+        <button class="primary-button" type="submit" :disabled="isSubmitting">
+          {{ isSubmitting ? 'Guardando...' : 'Guardar mascota' }}
+        </button>
         <button class="secondary-button" type="button" @click="resetForm">Limpiar</button>
       </div>
     </form>
@@ -120,6 +122,10 @@
 
 <script setup>
 import { reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { apiCreatePet } from '../api/http'
+
+const router = useRouter()
 
 const initialForm = {
   name: '',
@@ -136,6 +142,7 @@ const form = reactive({ ...initialForm })
 const errors = ref({})
 const submitMessage = ref('')
 const isValidSubmission = ref(false)
+const isSubmitting = ref(false)
 
 const resetForm = () => {
   Object.assign(form, initialForm)
@@ -188,7 +195,9 @@ const validateForm = () => {
   return nextErrors
 }
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
+  if (isSubmitting.value) return
+
   const nextErrors = validateForm()
 
   errors.value = nextErrors
@@ -199,8 +208,26 @@ const handleSubmit = () => {
     return
   }
 
-  isValidSubmission.value = true
-  submitMessage.value = 'Formulario válido. La mascota quedó lista para registrarse.'
-  Object.assign(form, initialForm)
+  isSubmitting.value = true
+  submitMessage.value = ''
+
+  try {
+    await apiCreatePet({
+      ...form,
+      age: Number(form.age)
+    })
+
+    isValidSubmission.value = true
+    submitMessage.value = 'Mascota creada correctamente.'
+
+    setTimeout(() => {
+      router.push('/mascotas')
+    }, 800)
+  } catch (error) {
+    isValidSubmission.value = false
+    submitMessage.value = error.message || 'No se pudo registrar la mascota.'
+  } finally {
+    isSubmitting.value = false
+  }
 }
 </script>

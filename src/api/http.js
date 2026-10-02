@@ -87,6 +87,20 @@ apiClient.interceptors.response.use(
 export const apiHealthCheck = () => apiClient.get('/health')
 export const apiLogin = (credentials) => apiClient.post('/api/auth/login', credentials)
 export const apiRegister = (userData) => apiClient.post('/api/auth/register', userData)
+export const apiCreatePet = async (petData) => {
+  const payload = {
+    name: petData.name?.trim(),
+    species: petData.species?.trim(),
+    breed: petData.breed?.trim(),
+    age: Number(petData.age),
+    gender: petData.gender?.trim(),
+    status: petData.status?.trim() || 'Disponible',
+    location: petData.location?.trim(),
+    description: petData.description?.trim()
+  }
+
+  return apiClient.post('/api/mascotas', payload)
+}
 
 export const apiGetPets = async () => {
   try {

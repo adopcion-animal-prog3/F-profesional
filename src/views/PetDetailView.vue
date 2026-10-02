@@ -65,6 +65,7 @@
 
         <div class="nav-links detail-actions">
           <router-link to="/mascotas">Volver al listado</router-link>
+          <router-link :to="{ name: 'mascota-editar', params: { id: pet.id } }">Editar mascota</router-link>
           <router-link to="/dashboard">Ir al dashboard</router-link>
         </div>
       </div>

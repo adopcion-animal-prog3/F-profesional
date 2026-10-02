@@ -37,6 +37,16 @@ const demoPets = [
   }
 ]
 
+const normalizePetPayload = (payload) => {
+  if (!payload || typeof payload !== 'object') return null
+
+  if (payload.mascota) return payload.mascota
+  if (payload.pet) return payload.pet
+  if (payload.data && typeof payload.data === 'object') return payload.data
+
+  return payload
+}
+
 const normalizePetsPayload = (payload) => {
   if (Array.isArray(payload)) return payload
   if (payload && Array.isArray(payload.mascotas)) return payload.mascotas
@@ -77,6 +87,7 @@ apiClient.interceptors.response.use(
 export const apiHealthCheck = () => apiClient.get('/health')
 export const apiLogin = (credentials) => apiClient.post('/api/auth/login', credentials)
 export const apiRegister = (userData) => apiClient.post('/api/auth/register', userData)
+
 export const apiGetPets = async () => {
   try {
     const response = await apiClient.get('/api/mascotas')
@@ -86,9 +97,7 @@ export const apiGetPets = async () => {
       data: normalizePetsPayload(response.data)
     }
   } catch (error) {
-    const isOffline =
-      typeof navigator !== 'undefined' && !navigator.onLine
-
+    const isOffline = typeof navigator !== 'undefined' && !navigator.onLine
     const isNetworkFailure =
       error?.code === 'ERR_NETWORK' ||
       error?.message?.includes('Network') ||
@@ -98,6 +107,45 @@ export const apiGetPets = async () => {
       return {
         source: 'demo',
         data: demoPets
+      }
+    }
+
+    throw error
+  }
+}
+
+export const apiGetPetById = async (petId) => {
+  try {
+    const response = await apiClient.get(`/api/mascotas/${petId}`)
+    const pet = normalizePetPayload(response.data)
+
+    return {
+      source: 'api',
+      data: pet,
+      notFound: !pet
+    }
+  } catch (error) {
+    const isOffline = typeof navigator !== 'undefined' && !navigator.onLine
+    const isNetworkFailure =
+      error?.code === 'ERR_NETWORK' ||
+      error?.message?.includes('Network') ||
+      isOffline
+
+    if (isNetworkFailure) {
+      const pet = demoPets.find((item) => String(item.id) === String(petId))
+
+      return {
+        source: 'demo',
+        data: pet || null,
+        notFound: !pet
+      }
+    }
+
+    if (error?.response?.status === 404) {
+      return {
+        source: 'api',
+        data: null,
+        notFound: true
       }
     }
 

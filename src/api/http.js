@@ -221,4 +221,41 @@ export const apiUpdatePetById = async (petId, petData) => {
   }
 }
 
+export const apiDeletePetById = async (petId) => {
+  try {
+    const response = await apiClient.delete(`/api/mascotas/${petId}`)
+    return {
+      source: 'api',
+      data: response.data ?? { deleted: true }
+    }
+  } catch (error) {
+    const isOffline = typeof navigator !== 'undefined' && !navigator.onLine
+    const isNetworkFailure =
+      error?.code === 'ERR_NETWORK' ||
+      error?.message?.includes('Network') ||
+      isOffline
+
+    if (isNetworkFailure) {
+      const petIndex = demoPets.findIndex((item) => String(item.id) === String(petId))
+
+      if (petIndex === -1) {
+        throw new Error('La mascota no existe para eliminarla.')
+      }
+
+      demoPets.splice(petIndex, 1)
+
+      return {
+        source: 'demo',
+        data: { deleted: true }
+      }
+    }
+
+    if (error?.response?.status === 404) {
+      throw new Error('La mascota no existe.')
+    }
+
+    throw error
+  }
+}
+
 export default apiClient

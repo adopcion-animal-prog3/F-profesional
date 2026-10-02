@@ -66,8 +66,15 @@
         <div class="nav-links detail-actions">
           <router-link to="/mascotas">Volver al listado</router-link>
           <router-link :to="{ name: 'mascota-editar', params: { id: pet.id } }">Editar mascota</router-link>
+          <button class="danger-button" type="button" :disabled="isDeleting" @click="handleDelete">
+            {{ isDeleting ? 'Eliminando...' : 'Eliminar mascota' }}
+          </button>
           <router-link to="/dashboard">Ir al dashboard</router-link>
         </div>
+
+        <p v-if="deleteMessage" :class="['delete-message', { error: deleteMessage.includes('No se pudo') }]">
+          {{ deleteMessage }}
+        </p>
       </div>
     </article>
   </section>
@@ -75,14 +82,17 @@
 
 <script setup>
 import { onMounted, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
-import { apiGetPetById } from '../api/http'
+import { useRoute, useRouter } from 'vue-router'
+import { apiDeletePetById, apiGetPetById } from '../api/http'
 
 const route = useRoute()
+const router = useRouter()
 const pet = ref(null)
 const isLoading = ref(true)
 const notFound = ref(false)
 const errorMessage = ref('')
+const isDeleting = ref(false)
+const deleteMessage = ref('')
 
 const normalizePet = (item) => ({
   id: item.id ?? item._id ?? route.params.id,
@@ -144,6 +154,23 @@ const loadPet = async () => {
     errorMessage.value = error.message || 'No se pudo cargar la mascota solicitada.'
   } finally {
     isLoading.value = false
+  }
+}
+
+const handleDelete = async () => {
+  if (!pet.value?.id || isDeleting.value) return
+
+  isDeleting.value = true
+  deleteMessage.value = ''
+
+  try {
+    await apiDeletePetById(pet.value.id)
+    deleteMessage.value = 'Mascota eliminada correctamente.'
+    router.push('/mascotas')
+  } catch (error) {
+    deleteMessage.value = error.message || 'No se pudo eliminar la mascota.'
+  } finally {
+    isDeleting.value = false
   }
 }
 

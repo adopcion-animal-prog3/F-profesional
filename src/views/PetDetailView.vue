@@ -160,6 +160,15 @@ const loadPet = async () => {
 const handleDelete = async () => {
   if (!pet.value?.id || isDeleting.value) return
 
+  const confirmed = window.confirm(
+    `¿Seguro que querés eliminar a ${pet.value.name}? Esta acción no se puede deshacer.`
+  )
+
+  if (!confirmed) {
+    deleteMessage.value = 'La eliminación fue cancelada.'
+    return
+  }
+
   isDeleting.value = true
   deleteMessage.value = ''
 

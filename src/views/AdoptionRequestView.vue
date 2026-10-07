@@ -9,13 +9,20 @@
       <router-link class="secondary-button" to="/mascotas">Volver a mascotas</router-link>
     </div>
 
-    <AdoptionRequestForm :pet="pet" @submit="handleSubmit" @cancel="handleCancel" />
+    <AdoptionRequestForm
+      :pet="pet"
+      :is-submitting="isSubmitting"
+      :submit-error="submitError"
+      @submit="handleSubmit"
+      @cancel="handleCancel"
+    />
   </section>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { apiCreateAdoptionRequest } from '../api/http'
 import AdoptionRequestForm from '../components/AdoptionRequestForm.vue'
 
 const router = useRouter()
@@ -52,8 +59,23 @@ const pet = computed(() => {
   }
 })
 
-const handleSubmit = (data) => {
-  console.info('Formulario de solicitud validado:', data)
+const isSubmitting = ref(false)
+const submitError = ref('')
+
+const handleSubmit = async (data) => {
+  isSubmitting.value = true
+  submitError.value = ''
+
+  try {
+    await apiCreateAdoptionRequest({ ...data, petId: pet.value.id })
+    router.push('/solicitudes', {
+      state: { created: true, petName: pet.value.name }
+    })
+  } catch (error) {
+    submitError.value = error.message || 'No se pudo crear la solicitud.'
+  } finally {
+    isSubmitting.value = false
+  }
 }
 
 const handleCancel = () => router.push(`/mascotas/${pet.value.id}`)

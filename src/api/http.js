@@ -142,6 +142,19 @@ export const apiGetSolicitudes = async () => {
   return { source: 'api', data: [] }
 }
 
+export const apiCreateAdoptionRequest = async (requestData) => {
+  const payload = {
+    petId: Number(requestData.petId),
+    name: requestData.name?.trim(),
+    email: requestData.email?.trim(),
+    phone: requestData.phone?.trim(),
+    message: requestData.message?.trim()
+  }
+
+  const response = await apiClient.post('/api/solicitudes', payload)
+  return { source: 'api', data: response.data }
+}
+
 export const apiGetPetById = async (petId) => {
   try {
     const response = await apiClient.get(`/api/mascotas/${petId}`)

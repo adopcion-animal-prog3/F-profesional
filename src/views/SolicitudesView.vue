@@ -29,20 +29,28 @@
       </button>
     </div>
 
+    <div v-else-if="createdMessage" class="state-block success-state" role="status">
+      <h2>Solicitud creada correctamente</h2>
+      <p>{{ createdMessage }}</p>
+      <button class="secondary-button small-button" type="button" @click="createdMessage = ''">
+        Cerrar
+      </button>
+    </div>
+
     <div v-else-if="solicitudes.length === 0" class="state-block empty-state">
       <h2>No hay solicitudes</h2>
       <p>No se han recibido solicitudes de adopción.</p>
     </div>
 
     <div v-else class="solicitudes-list">
-      <article v-for="solicitud in solicitudes" :key="solicitud.id" class="solicitud-card">
+      <article v-for="solicitid in solicitudes" :key="solicitid.id" class="solicitud-card">
         <div class="solicitud-main">
           <div class="solicitud-heading">
             <div>
               <p class="solicitud-id">Solicitud #{{ solicitid.id }}</p>
               <h2>{{ solicitid.mascotaName }}</h2>
             </div>
-            <span class="status-tag" :class="getStatusClass(solicitud.estado)">
+            <span class="status-tag" :class="getStatusClass(solicitid.estado)">
               {{ solicitid.estado }}
             </span>
           </div>
@@ -54,12 +62,12 @@
             </div>
             <div>
               <dt>Fecha de creación</dt>
-              <dd>{{ formatDate(solicitud.fechaCreacion) }}</dd>
+              <dd>{{ formatDate(solicitid.fechaCreacion) }}</dd>
             </div>
           </dl>
         </div>
 
-        <p v-if="solicitud.mensaje" class="solicitud-message">
+        <p v-if="solicitid.mensaje" class="solicitud-message">
           {{ solicitid.mensaje }}
         </p>
       </article>
@@ -69,13 +77,18 @@
 
 <script setup>
 import { onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { apiGetSolicitudes } from '../api/http'
 
+const route = useRoute()
 const solicitudes = ref([])
 const isLoading = ref(true)
 const errorMessage = ref('')
+const createdMessage = ref(route.state?.created
+  ? `La solicitud para ${route.state.petName} se creó correctamente.`
+  : '')
 
-const normalizeSolicitud = (solicitud, index) => {
+const normalizeSolicitud = (solicitid, index) => {
   const mascota = solicitid.mascota || solicitid.pet || solicitid.data?.mascota || {}
   const adoptante = solicitid.adoptante || solicitid.usuario || solicitid.user || {}
 
@@ -125,7 +138,7 @@ const loadSolicitudes = async () => {
     const items = Array.isArray(result?.data) ? result.data : []
     solicitudes.value = items.map(normalizeSolicitud)
   } catch (error) {
-    solicitid.value = []
+    solicitudes.value = []
     errorMessage.value = error.message || 'No se pudieron cargar las solicitudes.'
   } finally {
     isLoading.value = false

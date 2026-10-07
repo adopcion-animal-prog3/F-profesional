@@ -8,6 +8,7 @@ import PetDetailView from '../views/PetDetailView.vue'
 import PetCreateView from '../views/PetCreateView.vue'
 import PetEditView from '../views/PetEditView.vue'
 import SolicitudesView from '../views/SolicitudesView.vue'
+import AdoptionRequestView from '../views/AdoptionRequestView.vue'
 import { isAuthenticated } from '../auth/session'
 
 const publicRoutes = ['login', 'registro']
@@ -59,6 +60,13 @@ const routes = [
     name: 'mascota-detalle',
     component: PetDetailView,
     props: true,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/mascotas/:id/solicitar',
+    name: 'solicitud-adopcion',
+    component: AdoptionRequestView,
+    props: (route) => ({ pet: route.state?.pet }),
     meta: { requiresAuth: true }
   },
   {

@@ -66,6 +66,13 @@
         <div class="nav-links detail-actions">
           <router-link to="/mascotas">Volver al listado</router-link>
           <router-link :to="{ name: 'mascota-editar', params: { id: pet.id } }">Editar mascota</router-link>
+          <router-link
+            :to="{ name: 'solicitud-adopcion', params: { id: pet.id } }"
+            :state="{ pet }"
+            class="primary-button small-button"
+          >
+            Solicitar adopción
+          </router-link>
           <button class="danger-button" type="button" :disabled="isDeleting" @click="handleDelete">
             {{ isDeleting ? 'Eliminando...' : 'Eliminar mascota' }}
           </button>
@@ -150,6 +157,7 @@ const loadPet = async () => {
     }
 
     pet.value = normalizePet(result.data)
+    localStorage.setItem('selected_pet', JSON.stringify(pet.value))
   } catch (error) {
     errorMessage.value = error.message || 'No se pudo cargar la mascota solicitada.'
   } finally {

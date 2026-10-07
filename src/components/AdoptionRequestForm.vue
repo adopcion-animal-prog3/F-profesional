@@ -78,13 +78,15 @@
       </div>
 
       <div class="form-actions">
-        <button class="primary-button" type="submit">Solicitar adopción</button>
-        <button class="secondary-button" type="button" @click="handleCancel">Cancelar</button>
+        <button class="primary-button" type="submit" :disabled="isSubmitting">
+          {{ isSubmitting ? 'Enviando solicitud...' : 'Solicitar adopción' }}
+        </button>
+        <button class="secondary-button" type="button" @click="handleCancel" :disabled="isSubmitting">
+          Cancelar
+        </button>
       </div>
 
-      <p v-if="isReady" class="form-ready-message" role="status">
-        El formulario está listo. La conexión con el backend no se implementa en este Issue.
-      </p>
+      <p v-if="submitError" class="form-error" role="alert">{{ submitError }}</p>
     </form>
   </section>
 </template>
@@ -96,6 +98,14 @@ const props = defineProps({
   pet: {
     type: Object,
     required: true
+  },
+  isSubmitting: {
+    type: Boolean,
+    default: false
+  },
+  submitError: {
+    type: String,
+    default: ''
   }
 })
 

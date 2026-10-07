@@ -128,6 +128,20 @@ export const apiGetPets = async () => {
   }
 }
 
+export const apiGetSolicitudes = async () => {
+  const response = await apiClient.get('/api/solicitudes')
+
+  if (Array.isArray(response.data)) return { source: 'api', data: response.data }
+  if (Array.isArray(response.data?.solicitudes)) {
+    return { source: 'api', data: response.data.solicitudes }
+  }
+  if (Array.isArray(response.data?.data)) {
+    return { source: 'api', data: response.data.data }
+  }
+
+  return { source: 'api', data: [] }
+}
+
 export const apiGetPetById = async (petId) => {
   try {
     const response = await apiClient.get(`/api/mascotas/${petId}`)

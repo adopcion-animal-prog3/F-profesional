@@ -12,6 +12,7 @@
       <nav class="sidebar-nav" aria-label="Navegación principal">
         <router-link class="nav-item" :to="{ name: 'dashboard' }">Dashboard</router-link>
         <router-link class="nav-item" :to="{ name: 'mascotas' }">Mascotas</router-link>
+        <router-link class="nav-item" :to="{ name: 'solicitudes' }">Solicitudes</router-link>
         <router-link class="nav-item" :to="{ name: 'mascota-nueva' }">Nueva mascota</router-link>
         <router-link class="nav-item" :to="{ name: 'login' }">Login</router-link>
         <router-link class="nav-item" :to="{ name: 'registro' }">Registro</router-link>
@@ -50,6 +51,8 @@ const pageTitle = computed(() => {
       return 'Dashboard'
     case 'mascotas':
       return 'Mascotas'
+    case 'solicitudes':
+      return 'Solicitudes de adopción'
     case 'mascota-nueva':
       return 'Registrar mascota'
     case 'mascota-detalle':

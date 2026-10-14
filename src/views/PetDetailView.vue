@@ -63,7 +63,7 @@
           <p>{{ pet.description }}</p>
         </div>
 
-        <PetClinicalHistory :pet-id="pet.id" />
+        <PetClinicalHistory :pet-id="pet.id" :pet-name="pet.name" />
 
         <div class="nav-links detail-actions">
           <router-link to="/mascotas">Volver al listado</router-link>

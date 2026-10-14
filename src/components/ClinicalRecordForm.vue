@@ -11,7 +11,7 @@
     <div class="form-grid">
       <div class="field-group">
         <label for="clinical-date">Fecha del registro</label>
-        <input id="clinical-date" v-model="form.fecha_registro" type="date" />
+        <p>La asignará el servidor al guardar.</p>
       </div>
 
       <div class="field-group">
@@ -21,8 +21,20 @@
           v-model.trim="form.veterinario"
           type="text"
           autocomplete="name"
+          maxlength="200"
+          :class="{ invalid: errors.veterinario }"
+          :aria-invalid="Boolean(errors.veterinario)"
+          :aria-describedby="errors.veterinario ? 'clinical-veterinarian-error' : undefined"
           placeholder="Nombre del veterinario"
         />
+        <p
+          v-if="errors.veterinario"
+          id="clinical-veterinarian-error"
+          class="field-error"
+          role="alert"
+        >
+          {{ errors.veterinario }}
+        </p>
       </div>
 
       <div class="field-group field-full">
@@ -48,13 +60,20 @@
       </div>
     </div>
 
-    <p v-if="feedbackMessage" class="submit-message success" role="status">
-      {{ feedbackMessage }}
+    <p v-if="submitError" class="submit-message" role="alert">
+      {{ submitError }}
     </p>
 
     <div class="form-actions">
-      <button class="primary-button" type="submit">Guardar</button>
-      <button class="secondary-button" type="button" @click="$emit('cancel')">
+      <button class="primary-button" type="submit" :disabled="isSubmitting">
+        {{ isSubmitting ? 'Guardando...' : 'Guardar' }}
+      </button>
+      <button
+        class="secondary-button"
+        type="button"
+        :disabled="isSubmitting"
+        @click="$emit('cancel')"
+      >
         Cancelar
       </button>
     </div>
@@ -64,7 +83,7 @@
 <script setup>
 import { reactive, ref } from 'vue'
 
-defineProps({
+const props = defineProps({
   petId: {
     type: [Number, String],
     required: true
@@ -72,28 +91,43 @@ defineProps({
   petName: {
     type: String,
     required: true
+  },
+  isSubmitting: {
+    type: Boolean,
+    default: false
+  },
+  submitError: {
+    type: String,
+    default: ''
   }
 })
 
-defineEmits(['cancel'])
+const emit = defineEmits(['cancel', 'submit'])
 
 const form = reactive({
-  fecha_registro: '',
   descripcion: '',
   veterinario: ''
 })
 const errors = ref({})
-const feedbackMessage = ref('')
 
 const handleSubmit = () => {
+  if (props.isSubmitting) return
+
   errors.value = {}
-  feedbackMessage.value = ''
 
   if (!form.descripcion.trim()) {
     errors.value.descripcion = 'La descripción es obligatoria.'
-    return
   }
 
-  feedbackMessage.value = 'Datos válidos. El registro todavía no se guardó.'
+  if (form.veterinario.trim().length > 200) {
+    errors.value.veterinario = 'El nombre del veterinario no puede superar 200 caracteres.'
+  }
+
+  if (Object.keys(errors.value).length > 0) return
+
+  emit('submit', {
+    descripcion: form.descripcion.trim(),
+    veterinario: form.veterinario.trim() || null
+  })
 }
 </script>

@@ -211,6 +211,18 @@ export const apiGetPetHistory = async (petId) => {
   return []
 }
 
+export const apiCreatePetHistory = async (petId, recordData) => {
+  const response = await apiClient.post(
+    `/api/mascotas/${encodeURIComponent(petId)}/historial`,
+    {
+      descripcion: recordData.descripcion.trim(),
+      veterinario: recordData.veterinario?.trim() || null
+    }
+  )
+
+  return response.data
+}
+
 export const apiUpdatePetById = async (petId, petData) => {
   const payload = {
     name: petData.name?.trim(),

@@ -2,6 +2,24 @@
   <section class="clinical-history" aria-labelledby="clinical-history-title">
     <h2 id="clinical-history-title">Historial clínico</h2>
 
+    <div v-if="isAdmin" class="form-actions">
+      <button
+        v-if="!isFormOpen"
+        class="primary-button small-button"
+        type="button"
+        @click="isFormOpen = true"
+      >
+        Nuevo registro clínico
+      </button>
+    </div>
+
+    <ClinicalRecordForm
+      v-if="isAdmin && isFormOpen"
+      :pet-id="petId"
+      :pet-name="petName"
+      @cancel="isFormOpen = false"
+    />
+
     <div v-if="isLoading" class="state-block loading-state" aria-live="polite">
       <div class="spinner" aria-label="Cargando historial clínico"></div>
       <p>Cargando historial clínico...</p>
@@ -33,12 +51,18 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { apiGetPetHistory } from '../api/http'
+import { getStoredUser } from '../auth/session'
+import ClinicalRecordForm from './ClinicalRecordForm.vue'
 
 const props = defineProps({
   petId: {
     type: [Number, String],
+    required: true
+  },
+  petName: {
+    type: String,
     required: true
   }
 })
@@ -46,6 +70,10 @@ const props = defineProps({
 const records = ref([])
 const isLoading = ref(true)
 const errorMessage = ref('')
+const isFormOpen = ref(false)
+const isAdmin = computed(() =>
+  String(getStoredUser()?.role || '').trim().toUpperCase() === 'ADMIN'
+)
 let latestRequest = 0
 
 const normalizeRecord = (record, index) => {

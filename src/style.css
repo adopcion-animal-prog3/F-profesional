@@ -1033,6 +1033,50 @@ button, input, textarea, select {
   color: #b91c1c;
 }
 
+.solicitud-admin {
+  display: grid;
+  gap: 8px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.solicitud-admin label {
+  color: #475569;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.solicitud-admin-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.solicitud-admin-controls select {
+  min-height: 42px;
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  color: #0f172a;
+  font: inherit;
+}
+
+.status-update-success,
+.status-update-error {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.status-update-success {
+  color: #166534;
+}
+
+.status-update-error {
+  color: #b91c1c;
+}
+
 @media (max-width: 860px) {
   .app-shell {
     flex-direction: column;

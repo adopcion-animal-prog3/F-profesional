@@ -70,20 +70,65 @@
         <p v-if="solicitid.mensaje" class="solicitud-message">
           {{ solicitid.mensaje }}
         </p>
+
+        <div v-if="isAdmin" class="solicitud-admin">
+          <label :for="`estado-${solicitid.id}`">Cambiar estado</label>
+          <div class="solicitud-admin-controls">
+            <select
+              :id="`estado-${solicitid.id}`"
+              v-model="solicitid.estadoSeleccionado"
+              :disabled="updatingSolicitudId !== null"
+            >
+              <option value="PENDIENTE">PENDIENTE</option>
+              <option value="APROBADA">APROBADA</option>
+              <option value="RECHAZADA">RECHAZADA</option>
+            </select>
+            <button
+              class="secondary-button small-button"
+              type="button"
+              :disabled="updatingSolicitudId !== null || solicitid.estadoSeleccionado === solicitid.estado"
+              @click="updateSolicitudStatus(solicitid)"
+            >
+              {{ updatingSolicitudId === solicitid.id ? 'Guardando...' : 'Guardar estado' }}
+            </button>
+          </div>
+          <p
+            v-if="feedbackSolicitudId === solicitid.id && statusUpdateMessage"
+            class="status-update-success"
+            role="status"
+          >
+            {{ statusUpdateMessage }}
+          </p>
+          <p
+            v-if="feedbackSolicitudId === solicitid.id && statusUpdateError"
+            class="status-update-error"
+            role="alert"
+          >
+            {{ statusUpdateError }}
+          </p>
+        </div>
       </article>
     </div>
   </section>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { apiGetSolicitudes } from '../api/http'
+import { apiGetSolicitudes, apiUpdateSolicitudStatus } from '../api/http'
+import { getStoredUser } from '../auth/session'
 
 const route = useRoute()
 const solicitudes = ref([])
 const isLoading = ref(true)
 const errorMessage = ref('')
+const updatingSolicitudId = ref(null)
+const feedbackSolicitudId = ref(null)
+const statusUpdateMessage = ref('')
+const statusUpdateError = ref('')
+const isAdmin = computed(() =>
+  String(getStoredUser()?.role || '').trim().toUpperCase() === 'ADMIN'
+)
 const createdMessage = ref(route.state?.created
   ? `La solicitud para ${route.state.petName} se creó correctamente.`
   : '')
@@ -91,6 +136,7 @@ const createdMessage = ref(route.state?.created
 const normalizeSolicitud = (solicitid, index) => {
   const mascota = solicitid.mascota || solicitid.pet || solicitid.data?.mascota || {}
   const adoptante = solicitid.adoptante || solicitid.usuario || solicitid.user || {}
+  const estado = solicitid.estado || solicitid.status || solicitid.estadoSolicitud || 'PENDIENTE'
 
   return {
     id: solicitid.id ?? solicitid._id ?? index + 1,
@@ -101,7 +147,8 @@ const normalizeSolicitud = (solicitid, index) => {
       adoptante.email ||
       adoptante.correo ||
       'Adoptante no especificado',
-    estado: solicitid.estado || solicitid.status || solicitid.estadoSolicitud || 'PENDIENTE',
+    estado,
+    estadoSeleccionado: estado,
     fechaCreacion:
       solicitid.fechaCreacion ||
       solicitid.fecha_creacion ||
@@ -142,6 +189,29 @@ const loadSolicitudes = async () => {
     errorMessage.value = error.message || 'No se pudieron cargar las solicitudes.'
   } finally {
     isLoading.value = false
+  }
+}
+
+const updateSolicitudStatus = async (solicitud) => {
+  if (!isAdmin.value || updatingSolicitudId.value !== null) return
+
+  const estado = solicitud.estadoSeleccionado
+  if (estado === solicitud.estado) return
+
+  updatingSolicitudId.value = solicitud.id
+  feedbackSolicitudId.value = solicitud.id
+  statusUpdateMessage.value = ''
+  statusUpdateError.value = ''
+
+  try {
+    await apiUpdateSolicitudStatus(solicitud.id, estado)
+    solicitud.estado = estado
+    solicitud.estadoSeleccionado = estado
+    statusUpdateMessage.value = 'Estado actualizado correctamente.'
+  } catch (error) {
+    statusUpdateError.value = error.message || 'No se pudo actualizar el estado.'
+  } finally {
+    updatingSolicitudId.value = null
   }
 }
 

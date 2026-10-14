@@ -155,6 +155,9 @@ export const apiCreateAdoptionRequest = async (requestData) => {
   return { source: 'api', data: response.data }
 }
 
+export const apiUpdateSolicitudStatus = (solicitudId, estado) =>
+  apiClient.put(`/api/solicitudes/${solicitudId}`, { estado })
+
 export const apiGetPetById = async (petId) => {
   try {
     const response = await apiClient.get(`/api/mascotas/${petId}`)

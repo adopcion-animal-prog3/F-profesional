@@ -63,6 +63,8 @@
           <p>{{ pet.description }}</p>
         </div>
 
+        <PetClinicalHistory :pet-id="pet.id" />
+
         <div class="nav-links detail-actions">
           <router-link to="/mascotas">Volver al listado</router-link>
           <router-link :to="{ name: 'mascota-editar', params: { id: pet.id } }">Editar mascota</router-link>
@@ -90,6 +92,7 @@
 <script setup>
 import { onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import PetClinicalHistory from '../components/PetClinicalHistory.vue'
 import { apiDeletePetById, apiGetPetById } from '../api/http'
 
 const route = useRoute()

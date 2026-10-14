@@ -197,6 +197,20 @@ export const apiGetPetById = async (petId) => {
   }
 }
 
+export const apiGetPetHistory = async (petId) => {
+  const response = await apiClient.get(
+    `/api/mascotas/${encodeURIComponent(petId)}/historial`
+  )
+  const payload = response.data
+
+  if (Array.isArray(payload)) return payload
+  if (Array.isArray(payload?.historial)) return payload.historial
+  if (Array.isArray(payload?.history)) return payload.history
+  if (Array.isArray(payload?.data)) return payload.data
+
+  return []
+}
+
 export const apiUpdatePetById = async (petId, petData) => {
   const payload = {
     name: petData.name?.trim(),

@@ -797,6 +797,46 @@ button, input, textarea, select {
   line-height: 1.7;
 }
 
+.clinical-history {
+  display: grid;
+  gap: 16px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.clinical-history h2 {
+  margin: 0;
+  color: #0f172a;
+}
+
+.clinical-history-list {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.clinical-history-record {
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.clinical-history-record time,
+.clinical-history-record strong {
+  color: #334155;
+  font-size: 0.9rem;
+}
+
+.clinical-history-record p {
+  margin: 8px 0 0;
+  color: #475569;
+  line-height: 1.6;
+}
+
 .detail-actions {
   justify-content: flex-start;
   margin-top: 24px;

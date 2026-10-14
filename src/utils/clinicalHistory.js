@@ -8,6 +8,7 @@ export const normalizeClinicalHistoryRecord = (record, index) => {
     id: record.id ?? record._id ?? index,
     date: record.fecha_registro ?? record.fecha ?? record.date ?? record.fechaRegistro ?? record.createdAt ?? '',
     description: record.descripcion ?? record.description ?? record.detalle ?? 'Sin descripción',
+    veterinarianValue: veterinarianName || null,
     veterinarian: veterinarianName || record.veterinarioNombre || 'No informado'
   }
 }

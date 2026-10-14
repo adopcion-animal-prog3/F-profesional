@@ -7,17 +7,24 @@
         v-if="!isFormOpen"
         class="primary-button small-button"
         type="button"
-        @click="isFormOpen = true"
+        @click="openCreateForm"
       >
         Nuevo registro clínico
       </button>
     </div>
 
+    <p v-if="createSuccessMessage" class="submit-message success" role="status">
+      {{ createSuccessMessage }}
+    </p>
+
     <ClinicalRecordForm
       v-if="isAdmin && isFormOpen"
       :pet-id="petId"
       :pet-name="petName"
+      :is-submitting="isCreatingRecord"
+      :submit-error="createErrorMessage"
       @cancel="isFormOpen = false"
+      @submit="createRecord"
     />
 
     <div v-if="isLoading" class="state-block loading-state" aria-live="polite">
@@ -41,7 +48,7 @@
     <ol v-else class="clinical-history-list">
       <li v-for="record in records" :key="record.id">
         <article class="clinical-history-record">
-          <time v-if="record.date" :datetime="record.date">{{ formatDate(record.date) }}</time>
+          <time v-if="record.date" :datetime="record.date">{{ formatClinicalHistoryDate(record.date) }}</time>
           <p>{{ record.description }}</p>
           <p><strong>Veterinario:</strong> {{ record.veterinarian }}</p>
         </article>
@@ -52,8 +59,9 @@
 
 <script setup>
 import { computed, ref, watch } from 'vue'
-import { apiGetPetHistory } from '../api/http'
+import { apiCreatePetHistory, apiGetPetHistory } from '../api/http'
 import { getStoredUser } from '../auth/session'
+import { formatClinicalHistoryDate, normalizeClinicalHistoryRecord } from '../utils/clinicalHistory'
 import ClinicalRecordForm from './ClinicalRecordForm.vue'
 
 const props = defineProps({
@@ -71,34 +79,13 @@ const records = ref([])
 const isLoading = ref(true)
 const errorMessage = ref('')
 const isFormOpen = ref(false)
+const isCreatingRecord = ref(false)
+const createErrorMessage = ref('')
+const createSuccessMessage = ref('')
 const isAdmin = computed(() =>
   String(getStoredUser()?.role || '').trim().toUpperCase() === 'ADMIN'
 )
 let latestRequest = 0
-
-const normalizeRecord = (record, index) => {
-  const veterinarian = record.veterinario ?? record.veterinarian ?? record.doctor
-  const veterinarianName = typeof veterinarian === 'string'
-    ? veterinarian
-    : veterinarian?.nombre || veterinarian?.name
-
-  return {
-    id: record.id ?? record._id ?? index,
-    date: record.fecha ?? record.date ?? record.fechaRegistro ?? record.createdAt ?? '',
-    description: record.descripcion ?? record.description ?? record.detalle ?? 'Sin descripción',
-    veterinarian: veterinarianName || record.veterinarioNombre || 'No informado'
-  }
-}
-
-const formatDate = (value) => {
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return String(value)
-
-  return new Intl.DateTimeFormat('es-AR', {
-    dateStyle: 'medium',
-    timeStyle: 'short'
-  }).format(date)
-}
 
 const loadHistory = async () => {
   const requestId = ++latestRequest
@@ -107,7 +94,7 @@ const loadHistory = async () => {
 
   try {
     const items = await apiGetPetHistory(props.petId)
-    if (requestId === latestRequest) records.value = items.map(normalizeRecord)
+    if (requestId === latestRequest) records.value = items.map(normalizeClinicalHistoryRecord)
   } catch (error) {
     if (requestId === latestRequest) {
       records.value = []
@@ -115,6 +102,31 @@ const loadHistory = async () => {
     }
   } finally {
     if (requestId === latestRequest) isLoading.value = false
+  }
+}
+
+const openCreateForm = () => {
+  createErrorMessage.value = ''
+  createSuccessMessage.value = ''
+  isFormOpen.value = true
+}
+
+const createRecord = async (recordData) => {
+  if (!isAdmin.value || isCreatingRecord.value) return
+
+  isCreatingRecord.value = true
+  createErrorMessage.value = ''
+  createSuccessMessage.value = ''
+
+  try {
+    await apiCreatePetHistory(props.petId, recordData)
+    isFormOpen.value = false
+    createSuccessMessage.value = 'Registro clínico creado correctamente.'
+    await loadHistory()
+  } catch (error) {
+    createErrorMessage.value = error.message || 'No se pudo crear el registro clínico.'
+  } finally {
+    isCreatingRecord.value = false
   }
 }
 

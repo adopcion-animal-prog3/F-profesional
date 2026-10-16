@@ -53,7 +53,7 @@
 <script setup>
 import { computed, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { apiLogin } from '../api/http'
+import { apiLogin, getApiErrorMessage } from '../api/http'
 import { saveSession } from '../auth/session'
 
 const router = useRouter()
@@ -113,12 +113,7 @@ const handleSubmit = async () => {
       router.push('/dashboard')
     }, 800)
   } catch (error) {
-    const fallbackMessage =
-      error?.response?.data?.message ||
-      error?.message ||
-      'No fue posible iniciar sesión. Inténtalo de nuevo.'
-
-    errorMessage.value = fallbackMessage
+    errorMessage.value = getApiErrorMessage(error, 'login')
   } finally {
     isSubmitting.value = false
   }

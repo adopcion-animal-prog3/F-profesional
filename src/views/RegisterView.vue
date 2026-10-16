@@ -76,7 +76,7 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { apiRegister } from '../api/http'
+import { apiRegister, getApiErrorMessage } from '../api/http'
 
 const router = useRouter()
 
@@ -149,8 +149,7 @@ const handleSubmit = async () => {
       router.push('/login')
     }, 1200)
   } catch (error) {
-    const backendMessage = error?.response?.data?.message || error?.message
-    errorMessage.value = backendMessage || 'No se pudo completar el registro. Inténtalo de nuevo.'
+    errorMessage.value = getApiErrorMessage(error)
   } finally {
     isSubmitting.value = false
   }

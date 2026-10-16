@@ -54,6 +54,51 @@ const normalizePetsPayload = (payload) => {
   return []
 }
 
+const apiErrorMessages = {
+  validation: 'Revisá los datos ingresados e intentá nuevamente.',
+  unauthorized: 'Tu sesión venció o no es válida. Iniciá sesión nuevamente.',
+  forbidden: 'No tenés permisos para realizar esta acción.',
+  notFound: 'No encontramos el recurso solicitado. Puede haber sido eliminado.',
+  network: 'No se pudo conectar con el servidor. Revisá tu conexión e intentá nuevamente.',
+  server: 'El servidor tuvo un problema. Intentá nuevamente más tarde.',
+  unexpected: 'Ocurrió un error inesperado. Intentá nuevamente.'
+}
+
+const normalizeApiError = (error) => {
+  const status = error?.response?.status
+  let kind = 'unexpected'
+
+  if (status === 400 || status === 422) kind = 'validation'
+  else if (status === 401) kind = 'unauthorized'
+  else if (status === 403) kind = 'forbidden'
+  else if (status === 404) kind = 'notFound'
+  else if (status >= 500) kind = 'server'
+  else if (!error?.response || ['ERR_NETWORK', 'ECONNABORTED', 'ETIMEDOUT'].includes(error?.code)) {
+    kind = 'network'
+  }
+
+  const normalizedError = new Error(apiErrorMessages[kind])
+  normalizedError.name = 'ApiError'
+  normalizedError.status = status
+  normalizedError.kind = kind
+  normalizedError.code = error?.code
+  return normalizedError
+}
+
+export const getApiErrorMessage = (error, context = 'general') => {
+  if (context === 'login' && error?.kind === 'unauthorized') {
+    return 'El correo o la contraseña no son correctos.'
+  }
+
+  if (error?.kind && apiErrorMessages[error.kind]) return apiErrorMessages[error.kind]
+  if (error?.isAxiosError) return apiErrorMessages[normalizeApiError(error).kind]
+  if (error?.message && !/network error|timeout|failed to fetch/i.test(error.message)) {
+    return error.message
+  }
+
+  return apiErrorMessages.unexpected
+}
+
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
   timeout: 10000,
@@ -74,14 +119,7 @@ apiClient.interceptors.request.use((config) => {
 
 apiClient.interceptors.response.use(
   (response) => response,
-  (error) => {
-    const message =
-      error.response?.data?.message ||
-      error.message ||
-      'Error de comunicación con el backend.'
-
-    return Promise.reject(new Error(message))
-  }
+  (error) => Promise.reject(normalizeApiError(error))
 )
 
 export const apiHealthCheck = () => apiClient.get('/health')
@@ -113,6 +151,7 @@ export const apiGetPets = async () => {
   } catch (error) {
     const isOffline = typeof navigator !== 'undefined' && !navigator.onLine
     const isNetworkFailure =
+      error?.kind === 'network' ||
       error?.code === 'ERR_NETWORK' ||
       error?.message?.includes('Network') ||
       isOffline
@@ -171,6 +210,7 @@ export const apiGetPetById = async (petId) => {
   } catch (error) {
     const isOffline = typeof navigator !== 'undefined' && !navigator.onLine
     const isNetworkFailure =
+      error?.kind === 'network' ||
       error?.code === 'ERR_NETWORK' ||
       error?.message?.includes('Network') ||
       isOffline
@@ -185,7 +225,7 @@ export const apiGetPetById = async (petId) => {
       }
     }
 
-    if (error?.response?.status === 404) {
+    if (error?.status === 404) {
       return {
         source: 'api',
         data: null,
@@ -265,6 +305,7 @@ export const apiUpdatePetById = async (petId, petData) => {
   } catch (error) {
     const isOffline = typeof navigator !== 'undefined' && !navigator.onLine
     const isNetworkFailure =
+      error?.kind === 'network' ||
       error?.code === 'ERR_NETWORK' ||
       error?.message?.includes('Network') ||
       isOffline
@@ -290,7 +331,7 @@ export const apiUpdatePetById = async (petId, petData) => {
       }
     }
 
-    if (error?.response?.status === 404) {
+    if (error?.status === 404) {
       throw new Error('La mascota no existe.')
     }
 
@@ -327,7 +368,7 @@ export const apiDeletePetById = async (petId) => {
       }
     }
 
-    if (error?.response?.status === 404) {
+    if (error?.status === 404) {
       throw new Error('La mascota no existe.')
     }
 

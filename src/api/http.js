@@ -236,6 +236,14 @@ export const apiUpdateClinicalHistory = async (recordId, recordData) => {
   return response.data
 }
 
+export const apiDeleteClinicalHistory = async (recordId) => {
+  const response = await apiClient.delete(
+    `/api/historial/${encodeURIComponent(recordId)}`
+  )
+
+  return response.data
+}
+
 export const apiUpdatePetById = async (petId, petData) => {
   const payload = {
     name: petData.name?.trim(),

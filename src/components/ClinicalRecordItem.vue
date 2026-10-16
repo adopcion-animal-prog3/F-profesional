@@ -4,14 +4,24 @@
       <time v-if="record.date" :datetime="record.date">{{ formatClinicalHistoryDate(record.date) }}</time>
       <p>{{ record.description }}</p>
       <p><strong>Veterinario:</strong> {{ record.veterinarian }}</p>
-      <button
-        v-if="isAdmin"
-        class="secondary-button small-button"
-        type="button"
-        @click="$emit('edit')"
-      >
-        Editar
-      </button>
+      <div v-if="isAdmin" class="form-actions">
+        <button
+          class="secondary-button small-button"
+          type="button"
+          :disabled="isDeleting"
+          @click="$emit('edit')"
+        >
+          Editar
+        </button>
+        <button
+          class="danger-button small-button"
+          type="button"
+          :disabled="isDeleting"
+          @click="deleteRecord"
+        >
+          {{ isDeleting ? 'Eliminando...' : 'Eliminar' }}
+        </button>
+      </div>
     </template>
 
     <ClinicalRecordForm
@@ -25,12 +35,14 @@
       @submit="saveRecord"
     />
 
+    <p v-if="deleteError" class="submit-message" role="alert">{{ deleteError }}</p>
+
   </article>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import { apiUpdateClinicalHistory } from '../api/http'
+import { apiDeleteClinicalHistory, apiUpdateClinicalHistory } from '../api/http'
 import { formatClinicalHistoryDate } from '../utils/clinicalHistory'
 import ClinicalRecordForm from './ClinicalRecordForm.vue'
 
@@ -42,9 +54,11 @@ const props = defineProps({
   isEditing: { type: Boolean, default: false }
 })
 
-const emit = defineEmits(['edit', 'cancel-edit', 'updated'])
+const emit = defineEmits(['edit', 'cancel-edit', 'updated', 'deleted'])
 const isSubmitting = ref(false)
 const errorMessage = ref('')
+const isDeleting = ref(false)
+const deleteError = ref('')
 
 const saveRecord = async (recordData) => {
   if (!props.isAdmin || isSubmitting.value) return
@@ -60,6 +74,27 @@ const saveRecord = async (recordData) => {
     errorMessage.value = error.message || 'No se pudo actualizar el registro clínico.'
   } finally {
     isSubmitting.value = false
+  }
+}
+
+const deleteRecord = async () => {
+  if (!props.isAdmin || isDeleting.value) return
+
+  const confirmed = window.confirm(
+    `¿Eliminar el registro clínico "${props.record.description}"? Esta acción no se puede deshacer.`
+  )
+  if (!confirmed) return
+
+  isDeleting.value = true
+  deleteError.value = ''
+
+  try {
+    await apiDeleteClinicalHistory(props.record.id)
+    emit('deleted', props.record.id)
+  } catch (error) {
+    deleteError.value = error.message || 'No se pudo eliminar el registro clínico.'
+  } finally {
+    isDeleting.value = false
   }
 }
 </script>

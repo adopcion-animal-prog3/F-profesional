@@ -17,6 +17,9 @@
     <p v-if="editSuccessMessage" class="submit-message success" role="status">
       {{ editSuccessMessage }}
     </p>
+    <p v-if="deleteSuccessMessage" class="submit-message success" role="status">
+      {{ deleteSuccessMessage }}
+    </p>
 
     <ClinicalRecordForm
       v-if="isAdmin && isFormOpen && editingRecordId === null"
@@ -57,6 +60,7 @@
           @edit="editingRecordId = record.id"
           @cancel-edit="editingRecordId = null"
           @updated="handleRecordUpdated"
+          @deleted="handleRecordDeleted"
         />
       </li>
     </ol>
@@ -91,6 +95,7 @@ const createErrorMessage = ref('')
 const createSuccessMessage = ref('')
 const editingRecordId = ref(null)
 const editSuccessMessage = ref('')
+const deleteSuccessMessage = ref('')
 const isAdmin = computed(() => String(getStoredUser()?.role || '').trim().toUpperCase() === 'ADMIN')
 let latestRequest = 0
 
@@ -143,6 +148,11 @@ const createRecord = async (recordData) => {
 const handleRecordUpdated = async () => {
   editSuccessMessage.value = 'Registro clínico actualizado correctamente.'
   await loadHistory()
+}
+
+const handleRecordDeleted = (recordId) => {
+  records.value = records.value.filter((record) => String(record.id) !== String(recordId))
+  deleteSuccessMessage.value = 'Registro clínico eliminado correctamente.'
 }
 
 watch(() => props.petId, loadHistory, { immediate: true })

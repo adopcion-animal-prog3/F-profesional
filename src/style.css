@@ -414,6 +414,21 @@ button, input, textarea, select {
   gap: 16px;
 }
 
+.loading-inline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 14px;
+  color: #475569;
+  font-size: 0.9rem;
+}
+
+.loading-inline .spinner {
+  width: 20px;
+  height: 20px;
+  border-width: 2px;
+}
+
 .spinner {
   width: 42px;
   height: 42px;

@@ -108,7 +108,14 @@
           <button class="primary-button" type="submit" :disabled="isSubmitting">
             {{ isSubmitting ? 'Guardando...' : 'Guardar cambios' }}
           </button>
-          <button class="secondary-button" type="button" @click="loadPet">Recargar</button>
+          <button
+            class="secondary-button"
+            type="button"
+            :disabled="isLoading || isSubmitting"
+            @click="loadPet"
+          >
+            {{ isLoading ? 'Cargando...' : 'Recargar' }}
+          </button>
         </div>
       </form>
     </template>
@@ -138,7 +145,7 @@ const form = reactive({ ...initialForm })
 const errors = ref({})
 const submitMessage = ref('')
 const isSaveSuccess = ref(false)
-const isLoading = ref(true)
+const isLoading = ref(false)
 const isSubmitting = ref(false)
 const notFound = ref(false)
 const errorMessage = ref('')
@@ -208,6 +215,8 @@ const validateForm = () => {
 }
 
 const loadPet = async () => {
+  if (isLoading.value || isSubmitting.value) return
+
   isLoading.value = true
   notFound.value = false
   errorMessage.value = ''

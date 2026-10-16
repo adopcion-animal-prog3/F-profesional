@@ -31,12 +31,12 @@
       @submit="createRecord"
     />
 
-    <div v-if="isLoading" class="state-block loading-state" aria-live="polite">
+    <div v-if="isLoading && !hasLoadedSuccessfully" class="state-block loading-state" aria-live="polite">
       <div class="spinner" aria-label="Cargando historial clínico"></div>
       <p>Cargando historial clínico...</p>
     </div>
 
-    <div v-else-if="errorMessage" class="state-block error-state" role="alert">
+    <div v-else-if="errorMessage && !hasLoadedSuccessfully" class="state-block error-state" role="alert">
       <h3>No se pudo cargar el historial</h3>
       <p>{{ errorMessage }}</p>
       <button class="primary-button small-button" type="button" @click="loadHistory">
@@ -44,12 +44,20 @@
       </button>
     </div>
 
-    <div v-else-if="records.length === 0" class="state-block empty-state">
+    <p v-if="isRefreshing" class="loading-inline" role="status">
+      <span class="spinner" aria-hidden="true"></span>
+      Actualizando historial clínico...
+    </p>
+    <p v-if="errorMessage && hasLoadedSuccessfully" class="error-message" role="alert">
+      No se pudo actualizar el historial: {{ errorMessage }}
+    </p>
+
+    <div v-if="hasLoadedSuccessfully && records.length === 0" class="state-block empty-state">
       <h3>Sin registros clínicos</h3>
       <p>Esta mascota todavía no tiene registros en su historial.</p>
     </div>
 
-    <ol v-else class="clinical-history-list">
+    <ol v-if="records.length > 0" class="clinical-history-list">
       <li v-for="record in records" :key="record.id">
         <ClinicalRecordItem
           :record="record"
@@ -87,7 +95,9 @@ const props = defineProps({
 })
 
 const records = ref([])
-const isLoading = ref(true)
+const isLoading = ref(false)
+const isRefreshing = ref(false)
+const hasLoadedSuccessfully = ref(false)
 const errorMessage = ref('')
 const isFormOpen = ref(false)
 const isCreatingRecord = ref(false)
@@ -100,22 +110,28 @@ const isAdmin = computed(() => String(getStoredUser()?.role || '').trim().toUppe
 let latestRequest = 0
 
 const loadHistory = async () => {
+  if (isLoading.value || isRefreshing.value) return
+
   const requestId = ++latestRequest
-  isLoading.value = true
+  isLoading.value = !hasLoadedSuccessfully.value
+  isRefreshing.value = hasLoadedSuccessfully.value
   errorMessage.value = ''
 
   try {
     const items = await apiGetPetHistory(props.petId)
     if (requestId === latestRequest) {
       records.value = items.map(normalizeClinicalHistoryRecord)
+      hasLoadedSuccessfully.value = true
     }
   } catch (error) {
     if (requestId === latestRequest) {
-      records.value = []
       errorMessage.value = error.message || 'No se pudo cargar el historial clínico.'
     }
   } finally {
-    if (requestId === latestRequest) isLoading.value = false
+    if (requestId === latestRequest) {
+      isLoading.value = false
+      isRefreshing.value = false
+    }
   }
 }
 

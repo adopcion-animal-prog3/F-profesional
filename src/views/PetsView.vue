@@ -9,17 +9,17 @@
       <div class="header-actions">
         <router-link class="primary-button small-button" to="/mascotas/nueva">Nueva mascota</router-link>
         <button class="primary-button small-button" type="button" @click="loadPets" :disabled="isLoading">
-          {{ isLoading ? 'Cargando...' : 'Actualizar' }}
+          {{ isLoading ? (hasLoadedSuccessfully ? 'Actualizando...' : 'Cargando...') : 'Actualizar' }}
         </button>
       </div>
     </div>
 
-    <div v-if="isLoading" class="state-block loading-state">
+    <div v-if="isLoading && !hasLoadedSuccessfully" class="state-block loading-state">
       <div class="spinner" aria-label="Cargando mascotas"></div>
       <p>Cargando mascotas...</p>
     </div>
 
-    <div v-else-if="errorMessage" class="state-block error-state">
+    <div v-else-if="errorMessage && !hasLoadedSuccessfully" class="state-block error-state">
       <h2>No se pudo cargar la lista</h2>
       <p>{{ errorMessage }}</p>
       <button class="primary-button small-button" type="button" @click="loadPets">
@@ -27,12 +27,21 @@
       </button>
     </div>
 
-    <div v-else-if="pets.length === 0" class="state-block empty-state">
+    <p v-if="isLoading && hasLoadedSuccessfully" class="loading-inline" role="status">
+      <span class="spinner" aria-hidden="true"></span>
+      Actualizando mascotas...
+    </p>
+
+    <p v-if="errorMessage && hasLoadedSuccessfully" class="error-message" role="alert">
+      No se pudo actualizar la lista: {{ errorMessage }}
+    </p>
+
+    <div v-if="hasLoadedSuccessfully && pets.length === 0" class="state-block empty-state">
       <h2>No hay mascotas disponibles</h2>
       <p>En este momento no registramos animales en adopción.</p>
     </div>
 
-    <div v-else class="pets-grid">
+    <div v-if="pets.length > 0" class="pets-grid">
       <article v-for="pet in pets" :key="pet.id" class="pet-card">
         <div class="pet-image" :class="getPetTone(pet)">
           <span>{{ getPetInitials(pet.name) }}</span>
@@ -72,7 +81,8 @@ import { onMounted, ref } from 'vue'
 import { apiGetPets } from '../api/http'
 
 const pets = ref([])
-const isLoading = ref(true)
+const isLoading = ref(false)
+const hasLoadedSuccessfully = ref(false)
 const errorMessage = ref('')
 const isDemoMode = ref(false)
 
@@ -116,6 +126,8 @@ const getStatusClass = (status = '') =>
     .replace(/\s+/g, '-')
 
 const loadPets = async () => {
+  if (isLoading.value) return
+
   isLoading.value = true
   errorMessage.value = ''
 
@@ -125,10 +137,9 @@ const loadPets = async () => {
 
     pets.value = items.map(normalizePet)
     isDemoMode.value = result?.source === 'demo'
+    hasLoadedSuccessfully.value = true
   } catch (error) {
-    pets.value = []
     errorMessage.value = error.message || 'No se pudo cargar la lista de mascotas.'
-    isDemoMode.value = false
   } finally {
     isLoading.value = false
   }

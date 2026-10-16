@@ -63,6 +63,8 @@ const isSubmitting = ref(false)
 const submitError = ref('')
 
 const handleSubmit = async (data) => {
+  if (isSubmitting.value) return
+
   isSubmitting.value = true
   submitError.value = ''
 

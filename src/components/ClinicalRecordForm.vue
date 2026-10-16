@@ -20,6 +20,7 @@
           :class="{ invalid: errors.fecha_registro }"
           :aria-invalid="Boolean(errors.fecha_registro)"
           :aria-describedby="errors.fecha_registro ? 'clinical-date-error' : undefined"
+          :disabled="isSubmitting"
         />
         <p v-else>La asignará el servidor al guardar.</p>
         <p v-if="errors.fecha_registro" id="clinical-date-error" class="field-error" role="alert">{{ errors.fecha_registro }}</p>
@@ -37,6 +38,7 @@
           :aria-invalid="Boolean(errors.veterinario)"
           :aria-describedby="errors.veterinario ? 'clinical-veterinarian-error' : undefined"
           placeholder="Nombre del veterinario"
+          :disabled="isSubmitting"
         />
         <p v-if="errors.veterinario" id="clinical-veterinarian-error" class="field-error" role="alert">{{ errors.veterinario }}</p>
       </div>
@@ -52,6 +54,7 @@
           :aria-invalid="Boolean(errors.descripcion)"
           :aria-describedby="errors.descripcion ? 'clinical-description-error' : undefined"
           placeholder="Describe la consulta, diagnóstico o tratamiento"
+          :disabled="isSubmitting"
         />
         <p v-if="errors.descripcion" id="clinical-description-error" class="field-error" role="alert">{{ errors.descripcion }}</p>
       </div>

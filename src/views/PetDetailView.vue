@@ -90,7 +90,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import PetClinicalHistory from '../components/PetClinicalHistory.vue'
 import { apiDeletePetById, apiGetPetById } from '../api/http'
@@ -200,5 +200,4 @@ watch(
   { immediate: true }
 )
 
-onMounted(loadPet)
 </script>

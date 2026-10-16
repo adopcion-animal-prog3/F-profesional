@@ -114,7 +114,9 @@
         <button class="primary-button" type="submit" :disabled="isSubmitting">
           {{ isSubmitting ? 'Guardando...' : 'Guardar mascota' }}
         </button>
-        <button class="secondary-button" type="button" @click="resetForm">Limpiar</button>
+        <button class="secondary-button" type="button" :disabled="isSubmitting" @click="resetForm">
+          Limpiar
+        </button>
       </div>
     </form>
   </section>
@@ -145,6 +147,8 @@ const isValidSubmission = ref(false)
 const isSubmitting = ref(false)
 
 const resetForm = () => {
+  if (isSubmitting.value) return
+
   Object.assign(form, initialForm)
   errors.value = {}
   submitMessage.value = ''

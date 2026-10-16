@@ -12,16 +12,16 @@
         @click="loadSolicitudes"
         :disabled="isLoading"
       >
-        {{ isLoading ? 'Cargando...' : 'Actualizar' }}
+        {{ isLoading ? (hasLoadedSuccessfully ? 'Actualizando...' : 'Cargando...') : 'Actualizar' }}
       </button>
     </div>
 
-    <div v-if="isLoading" class="state-block loading-state">
+    <div v-if="isLoading && !hasLoadedSuccessfully" class="state-block loading-state">
       <div class="spinner" aria-label="Cargando solicitudes"></div>
       <p>Cargando solicitudes...</p>
     </div>
 
-    <div v-else-if="errorMessage" class="state-block error-state">
+    <div v-else-if="errorMessage && !hasLoadedSuccessfully" class="state-block error-state">
       <h2>No se pudieron cargar las solicitudes</h2>
       <p>{{ errorMessage }}</p>
       <button class="primary-button small-button" type="button" @click="loadSolicitudes">
@@ -29,20 +29,27 @@
       </button>
     </div>
 
-    <div v-else-if="createdMessage" class="state-block success-state" role="status">
-      <h2>Solicitud creada correctamente</h2>
-      <p>{{ createdMessage }}</p>
+    <p v-if="isLoading && hasLoadedSuccessfully" class="loading-inline" role="status">
+      <span class="spinner" aria-hidden="true"></span>
+      Actualizando solicitudes...
+    </p>
+
+    <p v-if="errorMessage && hasLoadedSuccessfully" class="error-message" role="alert">
+      No se pudieron actualizar las solicitudes: {{ errorMessage }}
+    </p>
+    <p v-if="createdMessage" class="success-message" role="status">
+      {{ createdMessage }}
       <button class="secondary-button small-button" type="button" @click="createdMessage = ''">
         Cerrar
       </button>
-    </div>
+    </p>
 
-    <div v-else-if="solicitudes.length === 0" class="state-block empty-state">
+    <div v-if="hasLoadedSuccessfully && solicitudes.length === 0" class="state-block empty-state">
       <h2>No hay solicitudes</h2>
       <p>No se han recibido solicitudes de adopción.</p>
     </div>
 
-    <div v-else class="solicitudes-list">
+    <div v-if="solicitudes.length > 0" class="solicitudes-list">
       <article v-for="solicitid in solicitudes" :key="solicitid.id" class="solicitud-card">
         <div class="solicitud-main">
           <div class="solicitud-heading">
@@ -120,7 +127,8 @@ import { getStoredUser } from '../auth/session'
 
 const route = useRoute()
 const solicitudes = ref([])
-const isLoading = ref(true)
+const isLoading = ref(false)
+const hasLoadedSuccessfully = ref(false)
 const errorMessage = ref('')
 const updatingSolicitudId = ref(null)
 const feedbackSolicitudId = ref(null)
@@ -177,6 +185,8 @@ const formatDate = (value) => {
 }
 
 const loadSolicitudes = async () => {
+  if (isLoading.value) return
+
   isLoading.value = true
   errorMessage.value = ''
 
@@ -184,8 +194,8 @@ const loadSolicitudes = async () => {
     const result = await apiGetSolicitudes()
     const items = Array.isArray(result?.data) ? result.data : []
     solicitudes.value = items.map(normalizeSolicitud)
+    hasLoadedSuccessfully.value = true
   } catch (error) {
-    solicitudes.value = []
     errorMessage.value = error.message || 'No se pudieron cargar las solicitudes.'
   } finally {
     isLoading.value = false

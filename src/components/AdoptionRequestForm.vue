@@ -23,6 +23,7 @@
             placeholder="Tu nombre completo"
             :class="{ invalid: errors.name }"
             aria-describedby="adoptante-nombre-error"
+            :disabled="isSubmitting"
           />
           <p v-if="errors.name" id="adoptante-nombre-error" class="field-error">
             {{ errors.name }}
@@ -39,6 +40,7 @@
             placeholder="usuario@ejemplo.com"
             :class="{ invalid: errors.email }"
             aria-describedby="adoptante-correo-error"
+            :disabled="isSubmitting"
           />
           <p v-if="errors.email" id="adoptante-correo-error" class="field-error">
             {{ errors.email }}
@@ -55,6 +57,7 @@
             placeholder="+54 0000 000000"
             :class="{ invalid: errors.phone }"
             aria-describedby="adoptante-telefono-error"
+            :disabled="isSubmitting"
           />
           <p v-if="errors.phone" id="adoptante-telefono-error" class="field-error">
             {{ errors.phone }}
@@ -70,6 +73,7 @@
             placeholder="Cuéntanos por qué deseas adoptar esta mascota"
             :class="{ invalid: errors.message }"
             aria-describedby="solicitud-mensaje-error"
+            :disabled="isSubmitting"
           />
           <p v-if="errors.message" id="solicitud-mensaje-error" class="field-error">
             {{ errors.message }}

@@ -2,7 +2,7 @@
   <form class="pet-form" novalidate @submit.prevent="handleSubmit">
     <div class="selected-pet-card">
       <div>
-        <p class="eyebrow">Nuevo registro clínico</p>
+        <p class="eyebrow">{{ record ? 'Editar registro clínico' : 'Nuevo registro clínico' }}</p>
         <h3>{{ petName }}</h3>
         <p>ID de mascota: {{ petId }}</p>
       </div>
@@ -11,7 +11,18 @@
     <div class="form-grid">
       <div class="field-group">
         <label for="clinical-date">Fecha del registro</label>
-        <p>La asignará el servidor al guardar.</p>
+        <input
+          v-if="record"
+          id="clinical-date"
+          v-model="form.fecha_registro"
+          type="date"
+          required
+          :class="{ invalid: errors.fecha_registro }"
+          :aria-invalid="Boolean(errors.fecha_registro)"
+          :aria-describedby="errors.fecha_registro ? 'clinical-date-error' : undefined"
+        />
+        <p v-else>La asignará el servidor al guardar.</p>
+        <p v-if="errors.fecha_registro" id="clinical-date-error" class="field-error" role="alert">{{ errors.fecha_registro }}</p>
       </div>
 
       <div class="field-group">
@@ -21,20 +32,13 @@
           v-model.trim="form.veterinario"
           type="text"
           autocomplete="name"
-          maxlength="200"
+          :maxlength="record ? undefined : 200"
           :class="{ invalid: errors.veterinario }"
           :aria-invalid="Boolean(errors.veterinario)"
           :aria-describedby="errors.veterinario ? 'clinical-veterinarian-error' : undefined"
           placeholder="Nombre del veterinario"
         />
-        <p
-          v-if="errors.veterinario"
-          id="clinical-veterinarian-error"
-          class="field-error"
-          role="alert"
-        >
-          {{ errors.veterinario }}
-        </p>
+        <p v-if="errors.veterinario" id="clinical-veterinarian-error" class="field-error" role="alert">{{ errors.veterinario }}</p>
       </div>
 
       <div class="field-group field-full">
@@ -49,14 +53,7 @@
           :aria-describedby="errors.descripcion ? 'clinical-description-error' : undefined"
           placeholder="Describe la consulta, diagnóstico o tratamiento"
         />
-        <p
-          v-if="errors.descripcion"
-          id="clinical-description-error"
-          class="field-error"
-          role="alert"
-        >
-          {{ errors.descripcion }}
-        </p>
+        <p v-if="errors.descripcion" id="clinical-description-error" class="field-error" role="alert">{{ errors.descripcion }}</p>
       </div>
     </div>
 
@@ -66,7 +63,7 @@
 
     <div class="form-actions">
       <button class="primary-button" type="submit" :disabled="isSubmitting">
-        {{ isSubmitting ? 'Guardando...' : 'Guardar' }}
+        {{ isSubmitting ? 'Guardando...' : record ? 'Actualizar' : 'Guardar' }}
       </button>
       <button
         class="secondary-button"
@@ -99,15 +96,21 @@ const props = defineProps({
   submitError: {
     type: String,
     default: ''
+  },
+  record: {
+    type: Object,
+    default: null
   }
 })
 
 const emit = defineEmits(['cancel', 'submit'])
 
 const form = reactive({
+  fecha_registro: props.record?.date?.slice(0, 10) || '',
   descripcion: '',
-  veterinario: ''
+  veterinario: props.record?.veterinarianValue ?? ''
 })
+form.descripcion = props.record?.description || ''
 const errors = ref({})
 
 const handleSubmit = () => {
@@ -119,15 +122,22 @@ const handleSubmit = () => {
     errors.value.descripcion = 'La descripción es obligatoria.'
   }
 
-  if (form.veterinario.trim().length > 200) {
+  if (props.record && (!form.fecha_registro || Number.isNaN(Date.parse(form.fecha_registro)))) {
+    errors.value.fecha_registro = 'Introduce una fecha válida.'
+  }
+
+  if (!props.record && form.veterinario.trim().length > 200) {
     errors.value.veterinario = 'El nombre del veterinario no puede superar 200 caracteres.'
   }
 
   if (Object.keys(errors.value).length > 0) return
 
-  emit('submit', {
+  const recordData = {
     descripcion: form.descripcion.trim(),
     veterinario: form.veterinario.trim() || null
-  })
+  }
+  if (props.record) recordData.fecha_registro = form.fecha_registro
+
+  emit('submit', recordData)
 }
 </script>

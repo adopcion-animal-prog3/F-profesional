@@ -2,23 +2,24 @@
   <section class="clinical-history" aria-labelledby="clinical-history-title">
     <h2 id="clinical-history-title">Historial clínico</h2>
 
-    <div v-if="isAdmin" class="form-actions">
-      <button
-        v-if="!isFormOpen"
-        class="primary-button small-button"
-        type="button"
-        @click="openCreateForm"
-      >
-        Nuevo registro clínico
-      </button>
-    </div>
+    <button
+      v-if="isAdmin && !isFormOpen && editingRecordId === null"
+      class="primary-button small-button"
+      type="button"
+      @click="openCreateForm"
+    >
+      Nuevo registro clínico
+    </button>
 
     <p v-if="createSuccessMessage" class="submit-message success" role="status">
       {{ createSuccessMessage }}
     </p>
+    <p v-if="editSuccessMessage" class="submit-message success" role="status">
+      {{ editSuccessMessage }}
+    </p>
 
     <ClinicalRecordForm
-      v-if="isAdmin && isFormOpen"
+      v-if="isAdmin && isFormOpen && editingRecordId === null"
       :pet-id="petId"
       :pet-name="petName"
       :is-submitting="isCreatingRecord"
@@ -47,11 +48,16 @@
 
     <ol v-else class="clinical-history-list">
       <li v-for="record in records" :key="record.id">
-        <article class="clinical-history-record">
-          <time v-if="record.date" :datetime="record.date">{{ formatClinicalHistoryDate(record.date) }}</time>
-          <p>{{ record.description }}</p>
-          <p><strong>Veterinario:</strong> {{ record.veterinarian }}</p>
-        </article>
+        <ClinicalRecordItem
+          :record="record"
+          :pet-id="petId"
+          :pet-name="petName"
+          :is-admin="isAdmin"
+          :is-editing="editingRecordId === record.id"
+          @edit="editingRecordId = record.id"
+          @cancel-edit="editingRecordId = null"
+          @updated="handleRecordUpdated"
+        />
       </li>
     </ol>
   </section>
@@ -61,8 +67,9 @@
 import { computed, ref, watch } from 'vue'
 import { apiCreatePetHistory, apiGetPetHistory } from '../api/http'
 import { getStoredUser } from '../auth/session'
-import { formatClinicalHistoryDate, normalizeClinicalHistoryRecord } from '../utils/clinicalHistory'
+import { normalizeClinicalHistoryRecord } from '../utils/clinicalHistory'
 import ClinicalRecordForm from './ClinicalRecordForm.vue'
+import ClinicalRecordItem from './ClinicalRecordItem.vue'
 
 const props = defineProps({
   petId: {
@@ -82,9 +89,9 @@ const isFormOpen = ref(false)
 const isCreatingRecord = ref(false)
 const createErrorMessage = ref('')
 const createSuccessMessage = ref('')
-const isAdmin = computed(() =>
-  String(getStoredUser()?.role || '').trim().toUpperCase() === 'ADMIN'
-)
+const editingRecordId = ref(null)
+const editSuccessMessage = ref('')
+const isAdmin = computed(() => String(getStoredUser()?.role || '').trim().toUpperCase() === 'ADMIN')
 let latestRequest = 0
 
 const loadHistory = async () => {
@@ -94,7 +101,9 @@ const loadHistory = async () => {
 
   try {
     const items = await apiGetPetHistory(props.petId)
-    if (requestId === latestRequest) records.value = items.map(normalizeClinicalHistoryRecord)
+    if (requestId === latestRequest) {
+      records.value = items.map(normalizeClinicalHistoryRecord)
+    }
   } catch (error) {
     if (requestId === latestRequest) {
       records.value = []
@@ -108,6 +117,7 @@ const loadHistory = async () => {
 const openCreateForm = () => {
   createErrorMessage.value = ''
   createSuccessMessage.value = ''
+  editSuccessMessage.value = ''
   isFormOpen.value = true
 }
 
@@ -128,6 +138,11 @@ const createRecord = async (recordData) => {
   } finally {
     isCreatingRecord.value = false
   }
+}
+
+const handleRecordUpdated = async () => {
+  editSuccessMessage.value = 'Registro clínico actualizado correctamente.'
+  await loadHistory()
 }
 
 watch(() => props.petId, loadHistory, { immediate: true })

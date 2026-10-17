@@ -1,8 +1,8 @@
 <!-- calidad:inicio -->
-![Calidad](https://img.shields.io/badge/Calidad-18%2F100-red) ![Cumple](https://img.shields.io/badge/Cumple-11%2F15-yellow) ![Aprobado](https://img.shields.io/badge/Aprobado-NO-red)
+![Calidad](https://img.shields.io/badge/Calidad-17%2F100-red) ![Aprobado](https://img.shields.io/badge/Aprobado-NO-red) ![Cumple](https://img.shields.io/badge/Cumple-11%2F15-yellow) ![Duplicación](https://img.shields.io/badge/Duplicaci%C3%B3n-31.2%25-orange) ![SEC](https://img.shields.io/badge/SEC-0-green) ![SQL](https://img.shields.io/badge/SQL-0-green) ![DBG](https://img.shields.io/badge/DBG-0-green) ![Capas](https://img.shields.io/badge/Capas-2-green) ![Tests](https://img.shields.io/badge/Tests-0-red) ![Vistas](https://img.shields.io/badge/Vistas-17-green)
 
-**Calidad de servicios (heurístico):** índice **18/100** · cumple **11/15** · aprobado **NO** · capas **2**
-`SEC 0 · SQL 0 · DBG 0 · duplicación 31.4% · vistas 14 · tests 0`
+**Calidad de servicios (heurístico):** índice **17/100** · cumple **11/15** · aprobado **NO** · capas **2**
+Detalle completo en [`docs/EVALUACION.md`](docs/EVALUACION.md).
 <!-- calidad:fin -->
 
 # F-profesional 

@@ -57,9 +57,6 @@
         <p v-if="errorMessage" class="error-message" role="alert">
           {{ errorMessage }}
         </p>
-        <p v-else-if="successMessage" class="success-message" role="status">
-          {{ successMessage }}
-        </p>
 
         <button type="submit" class="primary-button" :disabled="isSubmitting">
           {{ isSubmitting ? 'Creando cuenta...' : 'Crear cuenta' }}
@@ -77,6 +74,7 @@
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { apiRegister, getApiErrorMessage } from '../api/http'
+import { runWithSuccessMessage } from '../utils/successMessage'
 
 const router = useRouter()
 
@@ -88,7 +86,6 @@ const form = reactive({
 })
 
 const errorMessage = ref('')
-const successMessage = ref('')
 const isSubmitting = ref(false)
 
 const validateForm = () => {
@@ -124,7 +121,6 @@ const handleSubmit = async () => {
   if (isSubmitting.value) return
 
   errorMessage.value = ''
-  successMessage.value = ''
 
   try {
     validateForm()
@@ -137,17 +133,17 @@ const handleSubmit = async () => {
       password: form.password
     }
 
-    const response = await apiRegister(payload)
-    successMessage.value = response?.data?.message || 'Usuario registrado correctamente.'
+    await runWithSuccessMessage(
+      () => apiRegister(payload),
+      'Cuenta creada correctamente.'
+    )
 
     form.name = ''
     form.email = ''
     form.password = ''
     form.confirmPassword = ''
 
-    setTimeout(() => {
-      router.push('/login')
-    }, 1200)
+    router.push('/login')
   } catch (error) {
     errorMessage.value = getApiErrorMessage(error)
   } finally {

@@ -81,8 +81,8 @@
           <router-link to="/dashboard">Ir al dashboard</router-link>
         </div>
 
-        <p v-if="deleteMessage" :class="['delete-message', { error: deleteMessage.includes('No se pudo') }]">
-          {{ deleteMessage }}
+        <p v-if="deleteError" class="error-message" role="alert">
+          {{ deleteError }}
         </p>
       </div>
     </article>
@@ -94,6 +94,7 @@ import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import PetClinicalHistory from '../components/PetClinicalHistory.vue'
 import { apiDeletePetById, apiGetPetById } from '../api/http'
+import { runWithSuccessMessage } from '../utils/successMessage'
 
 const route = useRoute()
 const router = useRouter()
@@ -102,7 +103,7 @@ const isLoading = ref(true)
 const notFound = ref(false)
 const errorMessage = ref('')
 const isDeleting = ref(false)
-const deleteMessage = ref('')
+const deleteError = ref('')
 
 const normalizePet = (item) => ({
   id: item.id ?? item._id ?? route.params.id,
@@ -175,20 +176,19 @@ const handleDelete = async () => {
     `¿Seguro que querés eliminar a ${pet.value.name}? Esta acción no se puede deshacer.`
   )
 
-  if (!confirmed) {
-    deleteMessage.value = 'La eliminación fue cancelada.'
-    return
-  }
+  if (!confirmed) return
 
   isDeleting.value = true
-  deleteMessage.value = ''
+  deleteError.value = ''
 
   try {
-    await apiDeletePetById(pet.value.id)
-    deleteMessage.value = 'Mascota eliminada correctamente.'
+    await runWithSuccessMessage(
+      () => apiDeletePetById(pet.value.id),
+      'Mascota eliminada correctamente.'
+    )
     router.push('/mascotas')
   } catch (error) {
-    deleteMessage.value = error.message || 'No se pudo eliminar la mascota.'
+    deleteError.value = error.message || 'No se pudo eliminar la mascota.'
   } finally {
     isDeleting.value = false
   }

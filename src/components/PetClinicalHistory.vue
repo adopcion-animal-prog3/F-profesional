@@ -11,16 +11,6 @@
       Nuevo registro clínico
     </button>
 
-    <p v-if="createSuccessMessage" class="submit-message success" role="status">
-      {{ createSuccessMessage }}
-    </p>
-    <p v-if="editSuccessMessage" class="submit-message success" role="status">
-      {{ editSuccessMessage }}
-    </p>
-    <p v-if="deleteSuccessMessage" class="submit-message success" role="status">
-      {{ deleteSuccessMessage }}
-    </p>
-
     <ClinicalRecordForm
       v-if="isAdmin && isFormOpen && editingRecordId === null"
       :pet-id="petId"
@@ -80,6 +70,7 @@ import { computed, ref, watch } from 'vue'
 import { apiCreatePetHistory, apiGetPetHistory } from '../api/http'
 import { getStoredUser } from '../auth/session'
 import { normalizeClinicalHistoryRecord } from '../utils/clinicalHistory'
+import { runWithSuccessMessage } from '../utils/successMessage'
 import ClinicalRecordForm from './ClinicalRecordForm.vue'
 import ClinicalRecordItem from './ClinicalRecordItem.vue'
 
@@ -102,10 +93,7 @@ const errorMessage = ref('')
 const isFormOpen = ref(false)
 const isCreatingRecord = ref(false)
 const createErrorMessage = ref('')
-const createSuccessMessage = ref('')
 const editingRecordId = ref(null)
-const editSuccessMessage = ref('')
-const deleteSuccessMessage = ref('')
 const isAdmin = computed(() => String(getStoredUser()?.role || '').trim().toUpperCase() === 'ADMIN')
 let latestRequest = 0
 
@@ -137,8 +125,6 @@ const loadHistory = async () => {
 
 const openCreateForm = () => {
   createErrorMessage.value = ''
-  createSuccessMessage.value = ''
-  editSuccessMessage.value = ''
   isFormOpen.value = true
 }
 
@@ -147,12 +133,13 @@ const createRecord = async (recordData) => {
 
   isCreatingRecord.value = true
   createErrorMessage.value = ''
-  createSuccessMessage.value = ''
 
   try {
-    await apiCreatePetHistory(props.petId, recordData)
+    await runWithSuccessMessage(
+      () => apiCreatePetHistory(props.petId, recordData),
+      'Registro clínico creado correctamente.'
+    )
     isFormOpen.value = false
-    createSuccessMessage.value = 'Registro clínico creado correctamente.'
     await loadHistory()
   } catch (error) {
     createErrorMessage.value = error.message || 'No se pudo crear el registro clínico.'
@@ -162,13 +149,11 @@ const createRecord = async (recordData) => {
 }
 
 const handleRecordUpdated = async () => {
-  editSuccessMessage.value = 'Registro clínico actualizado correctamente.'
   await loadHistory()
 }
 
 const handleRecordDeleted = (recordId) => {
   records.value = records.value.filter((record) => String(record.id) !== String(recordId))
-  deleteSuccessMessage.value = 'Registro clínico eliminado correctamente.'
 }
 
 watch(() => props.petId, loadHistory, { immediate: true })

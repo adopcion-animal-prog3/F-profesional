@@ -108,6 +108,7 @@ button, input, textarea, select {
 
 .app-main {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
 }
@@ -149,6 +150,7 @@ button, input, textarea, select {
 
 .content-area {
   flex: 1;
+  min-width: 0;
   padding: 32px;
 }
 
@@ -352,7 +354,7 @@ button, input, textarea, select {
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
   gap: 20px;
 }
 
@@ -456,7 +458,7 @@ button, input, textarea, select {
 
 .pets-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
   gap: 20px;
 }
 
@@ -713,6 +715,23 @@ button, input, textarea, select {
   flex-wrap: wrap;
 }
 
+.primary-button,
+.secondary-button,
+.danger-button,
+.topbar-action {
+  min-height: 44px;
+}
+
+.page,
+.page-view,
+.pets-view,
+.pet-form-view,
+.pet-detail-view,
+.adoption-request-view,
+.solicitudes-view {
+  min-width: 0;
+}
+
 .pet-detail-view {
   width: min(960px, 100%);
   margin: 0 auto;
@@ -758,7 +777,7 @@ button, input, textarea, select {
 
 .detail-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
   gap: 16px;
   margin-bottom: 24px;
 }
@@ -1112,29 +1131,38 @@ button, input, textarea, select {
 
   .app-sidebar {
     width: 100%;
-    padding-bottom: 12px;
+    gap: 16px;
+    padding: 16px 20px;
   }
 
   .sidebar-nav {
-    flex-direction: row;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .nav-item {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
   }
 
   .topbar {
-    padding: 22px 20px 16px;
-    flex-direction: column;
-    align-items: flex-start;
+    padding: 20px 24px 16px;
   }
 
   .content-area {
-    padding: 20px;
+    padding: 24px;
   }
 
-  .section-header,
-  .detail-header,
-  .request-page-header {
+  .solicitud-main {
     flex-direction: column;
-    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .solicitud-meta {
+    min-width: 0;
+    width: 100%;
   }
 
   .request-form .form-grid {
@@ -1143,5 +1171,172 @@ button, input, textarea, select {
 
   .request-form .field-full {
     grid-column: auto;
+  }
+}
+
+@media (max-width: 560px) {
+  .app-sidebar {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .brand-block {
+    padding: 4px;
+  }
+
+  .sidebar-nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .nav-item {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+  }
+
+  .topbar {
+    align-items: flex-start;
+    gap: 8px;
+    padding: 16px;
+  }
+
+  .topbar h1 {
+    font-size: 1.45rem;
+    overflow-wrap: anywhere;
+  }
+
+  .topbar-action {
+    padding: 8px 12px;
+  }
+
+  .content-area {
+    padding: 12px;
+  }
+
+  .page,
+  .page-view {
+    padding: 28px 16px;
+    border-radius: 18px;
+  }
+
+  .page-view h1 {
+    font-size: 1.8rem;
+  }
+
+  .auth-card {
+    padding: 24px 18px;
+    border-radius: 16px;
+  }
+
+  .section-header,
+  .detail-header,
+  .request-page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .section-header h1,
+  .request-page-header h1,
+  .detail-header h1 {
+    overflow-wrap: anywhere;
+  }
+
+  .header-actions,
+  .form-actions,
+  .detail-actions,
+  .nav-links {
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .header-actions > *,
+  .form-actions > *,
+  .detail-actions > *,
+  .nav-links > * {
+    flex: 1 1 100%;
+    text-align: center;
+  }
+
+  .form-grid,
+  .request-form .form-grid,
+  .detail-grid,
+  .solicitud-meta {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .field-full,
+  .request-form .field-full,
+  .detail-item.wide {
+    grid-column: auto;
+  }
+
+  .pet-form,
+  .request-form {
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .selected-pet-card {
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .selected-pet-avatar {
+    flex-basis: 56px;
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    font-size: 1.2rem;
+  }
+
+  .pet-body,
+  .solicitud-card {
+    padding: 16px;
+  }
+
+  .pet-header,
+  .solicitud-heading {
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .pet-header {
+    flex-direction: column;
+  }
+
+  .solicitud-admin-controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .solicitud-admin-controls select,
+  .solicitud-admin-controls button {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .detail-body {
+    padding: 20px 16px;
+  }
+
+  .detail-hero {
+    min-height: 150px;
+  }
+
+  .clinical-history-record {
+    padding: 12px;
+    overflow-wrap: anywhere;
+  }
+
+  .clinical-history-record .form-actions > * {
+    flex: 1 1 calc(50% - 6px);
+  }
+
+  .field-group input,
+  .field-group select,
+  .field-group textarea,
+  .form-group input {
+    font-size: 16px;
   }
 }

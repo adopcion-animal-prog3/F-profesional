@@ -33,9 +33,6 @@
         <p v-if="errorMessage" class="error-message" role="alert">
           {{ errorMessage }}
         </p>
-        <p v-else-if="successMessage" class="success-message" role="status">
-          {{ successMessage }}
-        </p>
 
         <button type="submit" class="primary-button" :disabled="isSubmitting || !isFormValid">
           {{ isSubmitting ? 'Iniciando sesión...' : 'Iniciar sesión' }}
@@ -55,6 +52,7 @@ import { computed, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { apiLogin, getApiErrorMessage } from '../api/http'
 import { saveSession } from '../auth/session'
+import { runWithSuccessMessage } from '../utils/successMessage'
 
 const router = useRouter()
 
@@ -64,7 +62,6 @@ const form = reactive({
 })
 
 const errorMessage = ref('')
-const successMessage = ref('')
 const isSubmitting = ref(false)
 
 const isFormValid = computed(() => {
@@ -89,7 +86,6 @@ const handleSubmit = async () => {
   if (isSubmitting.value) return
 
   errorMessage.value = ''
-  successMessage.value = ''
 
   try {
     validateForm()
@@ -101,17 +97,16 @@ const handleSubmit = async () => {
       password: form.password
     }
 
-    const response = await apiLogin(payload)
-    const token = response?.data?.token
-    const user = response?.data?.user || null
+    await runWithSuccessMessage(async () => {
+      const response = await apiLogin(payload)
+      const token = response?.data?.token
+      const user = response?.data?.user || null
 
-    saveSession(token, user)
-    successMessage.value = response?.data?.message || 'Inicio de sesión correcto.'
-    form.password = ''
+      saveSession(token, user)
+      form.password = ''
+    }, 'Inicio de sesión correcto.')
 
-    setTimeout(() => {
-      router.push('/dashboard')
-    }, 800)
+    router.push('/dashboard')
   } catch (error) {
     errorMessage.value = getApiErrorMessage(error, 'login')
   } finally {

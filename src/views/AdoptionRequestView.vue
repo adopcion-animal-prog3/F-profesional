@@ -24,6 +24,7 @@ import { computed, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { apiCreateAdoptionRequest } from '../api/http'
 import AdoptionRequestForm from '../components/AdoptionRequestForm.vue'
+import { runWithSuccessMessage } from '../utils/successMessage'
 
 const router = useRouter()
 const route = useRoute()
@@ -69,10 +70,11 @@ const handleSubmit = async (data) => {
   submitError.value = ''
 
   try {
-    await apiCreateAdoptionRequest({ ...data, petId: pet.value.id })
-    router.push('/solicitudes', {
-      state: { created: true, petName: pet.value.name }
-    })
+    await runWithSuccessMessage(
+      () => apiCreateAdoptionRequest({ ...data, petId: pet.value.id }),
+      'Solicitud de adopción creada correctamente.'
+    )
+    router.push('/solicitudes')
   } catch (error) {
     submitError.value = error.message || 'No se pudo crear la solicitud.'
   } finally {

@@ -37,13 +37,6 @@
     <p v-if="errorMessage && hasLoadedSuccessfully" class="error-message" role="alert">
       No se pudieron actualizar las solicitudes: {{ errorMessage }}
     </p>
-    <p v-if="createdMessage" class="success-message" role="status">
-      {{ createdMessage }}
-      <button class="secondary-button small-button" type="button" @click="createdMessage = ''">
-        Cerrar
-      </button>
-    </p>
-
     <div v-if="hasLoadedSuccessfully && solicitudes.length === 0" class="state-block empty-state">
       <h2>No hay solicitudes</h2>
       <p>No se han recibido solicitudes de adopción.</p>
@@ -100,13 +93,6 @@
             </button>
           </div>
           <p
-            v-if="feedbackSolicitudId === solicitid.id && statusUpdateMessage"
-            class="status-update-success"
-            role="status"
-          >
-            {{ statusUpdateMessage }}
-          </p>
-          <p
             v-if="feedbackSolicitudId === solicitid.id && statusUpdateError"
             class="status-update-error"
             role="alert"
@@ -121,26 +107,20 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
 import { apiGetSolicitudes, apiUpdateSolicitudStatus } from '../api/http'
 import { getStoredUser } from '../auth/session'
+import { runWithSuccessMessage } from '../utils/successMessage'
 
-const route = useRoute()
 const solicitudes = ref([])
 const isLoading = ref(false)
 const hasLoadedSuccessfully = ref(false)
 const errorMessage = ref('')
 const updatingSolicitudId = ref(null)
 const feedbackSolicitudId = ref(null)
-const statusUpdateMessage = ref('')
 const statusUpdateError = ref('')
 const isAdmin = computed(() =>
   String(getStoredUser()?.role || '').trim().toUpperCase() === 'ADMIN'
 )
-const createdMessage = ref(route.state?.created
-  ? `La solicitud para ${route.state.petName} se creó correctamente.`
-  : '')
-
 const normalizeSolicitud = (solicitid, index) => {
   const mascota = solicitid.mascota || solicitid.pet || solicitid.data?.mascota || {}
   const adoptante = solicitid.adoptante || solicitid.usuario || solicitid.user || {}
@@ -210,14 +190,15 @@ const updateSolicitudStatus = async (solicitud) => {
 
   updatingSolicitudId.value = solicitud.id
   feedbackSolicitudId.value = solicitud.id
-  statusUpdateMessage.value = ''
   statusUpdateError.value = ''
 
   try {
-    await apiUpdateSolicitudStatus(solicitud.id, estado)
+    await runWithSuccessMessage(
+      () => apiUpdateSolicitudStatus(solicitud.id, estado),
+      'Estado de la solicitud actualizado correctamente.'
+    )
     solicitud.estado = estado
     solicitud.estadoSeleccionado = estado
-    statusUpdateMessage.value = 'Estado actualizado correctamente.'
   } catch (error) {
     statusUpdateError.value = error.message || 'No se pudo actualizar el estado.'
   } finally {

@@ -44,6 +44,7 @@
 import { ref } from 'vue'
 import { apiDeleteClinicalHistory, apiUpdateClinicalHistory } from '../api/http'
 import { formatClinicalHistoryDate } from '../utils/clinicalHistory'
+import { runWithSuccessMessage } from '../utils/successMessage'
 import ClinicalRecordForm from './ClinicalRecordForm.vue'
 
 const props = defineProps({
@@ -67,7 +68,10 @@ const saveRecord = async (recordData) => {
   errorMessage.value = ''
 
   try {
-    await apiUpdateClinicalHistory(props.record.id, recordData)
+    await runWithSuccessMessage(
+      () => apiUpdateClinicalHistory(props.record.id, recordData),
+      'Registro clínico actualizado correctamente.'
+    )
     emit('cancel-edit')
     emit('updated')
   } catch (error) {
@@ -89,7 +93,10 @@ const deleteRecord = async () => {
   deleteError.value = ''
 
   try {
-    await apiDeleteClinicalHistory(props.record.id)
+    await runWithSuccessMessage(
+      () => apiDeleteClinicalHistory(props.record.id),
+      'Registro clínico eliminado correctamente.'
+    )
     emit('deleted', props.record.id)
   } catch (error) {
     deleteError.value = error.message || 'No se pudo eliminar el registro clínico.'

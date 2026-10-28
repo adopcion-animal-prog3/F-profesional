@@ -100,7 +100,7 @@
           </div>
         </div>
 
-        <div v-if="submitMessage" :class="['submit-message', { success: isSaveSuccess }]">
+        <div v-if="submitMessage" class="submit-message" role="alert">
           {{ submitMessage }}
         </div>
 
@@ -126,6 +126,7 @@
 import { reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { apiGetPetById, apiUpdatePetById } from '../api/http'
+import { runWithSuccessMessage } from '../utils/successMessage'
 
 const route = useRoute()
 const router = useRouter()
@@ -144,7 +145,6 @@ const initialForm = {
 const form = reactive({ ...initialForm })
 const errors = ref({})
 const submitMessage = ref('')
-const isSaveSuccess = ref(false)
 const isLoading = ref(false)
 const isSubmitting = ref(false)
 const notFound = ref(false)
@@ -221,7 +221,6 @@ const loadPet = async () => {
   notFound.value = false
   errorMessage.value = ''
   submitMessage.value = ''
-  isSaveSuccess.value = false
   errors.value = {}
 
   try {
@@ -247,7 +246,6 @@ const handleSubmit = async () => {
   errors.value = nextErrors
 
   if (Object.keys(nextErrors).length > 0) {
-    isSaveSuccess.value = false
     submitMessage.value = 'Corrige los campos marcados para continuar.'
     return
   }
@@ -256,19 +254,15 @@ const handleSubmit = async () => {
   submitMessage.value = ''
 
   try {
-    await apiUpdatePetById(route.params.id, {
-      ...form,
-      age: Number(form.age)
-    })
-
-    isSaveSuccess.value = true
-    submitMessage.value = 'Mascota actualizada correctamente.'
-
-    setTimeout(() => {
-      router.push({ name: 'mascota-detalle', params: { id: route.params.id } })
-    }, 800)
+    await runWithSuccessMessage(
+      () => apiUpdatePetById(route.params.id, {
+        ...form,
+        age: Number(form.age)
+      }),
+      'Mascota actualizada correctamente.'
+    )
+    router.push({ name: 'mascota-detalle', params: { id: route.params.id } })
   } catch (error) {
-    isSaveSuccess.value = false
     submitMessage.value = error.message || 'No se pudo actualizar la mascota.'
   } finally {
     isSubmitting.value = false

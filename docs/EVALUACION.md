@@ -3,20 +3,20 @@
 
 > Documento **generado automáticamente** por la cátedra de Programación III (RepoSense + análisis de calidad + constancia). **No editar a mano**: se regenera en cada evaluación.
 > Rama evaluada: `main`. Análisis **heurístico** (regex + métricas): es una criba para orientar la revisión, **no una nota**.
-> Generado: 2026-10-28.
+> Generado: 2026-10-29.
 
 ## 1. Veredicto
 
 | Aspecto | Resultado |
 |---|---|
 | Tipo de proyecto | frontend |
-| Índice de calidad de servicios | **39/100** (mínimo 60) |
-| Criterios cumplidos | **11/15** |
+| Índice de calidad de servicios | **41/100** (mínimo 60) |
+| Criterios cumplidos | **11/14** |
 | Aprobado (semáforo) | **NO** |
-| Código (LOC) | 2,400 |
-| Archivos de código | 23 |
-| Tests (archivos) | 0 |
-| Cobertura de líneas | no medible (mínimo 80%) |
+| Código (LOC) | 2,507 |
+| Archivos de código | 26 |
+| Tests (archivos) | 1 |
+| Cobertura de líneas | no aplica (frontend sin herramienta de cobertura E2E) (mínimo 80%) |
 | Capas detectadas | vistas, servicios |
 | Tope por duplicación | `DUP>=15%` → índice ≤ 50 |
 
@@ -26,12 +26,10 @@
 
 | Autor | Commits | Código (LOC) | Tests (LOC) | Docs (LOC) | Días activos | % del código |
 |---|---:|---:|---:|---:|---:|---:|
-| juanmasecchi | 20 | 2,547 | 0 | 5 | 7 | 64% |
-| Juan Ignacio Cruzado | 12 | 1,439 | 0 | 0 | 4 | 36% |
+| juanmasecchi | 20 | 2,461 | 0 | 5 | 8 | 58% |
+| Juan Ignacio Cruzado | 15 | 1,751 | 69 | 54 | 5 | 42% |
 
 > _El LOC de autoría lo calcula RepoSense sobre el historial y puede diferir del LOC de código del análisis de calidad (que mira solo el estado de `main`)._
-
-> **Reparto del trabajo:** juanmasecchi concentra el 64% de las líneas de código. Un reparto muy desigual suele indicar que la integración no fue realmente en equipo; vale la pena reconstruir cómo se coordinó.
 
 ## 3. Constancia (IC) — todas las ramas
 
@@ -40,7 +38,7 @@
 | Alumno | Sesiones | Cumplimiento | Pausa | Recencia | IC | Nivel | Para subir de nivel |
 |---|--:|--:|--:|--:|--:|--|--|
 | juanmasecchi | 5 | 23% | 28 d | 0% | **15** | No aprueba | Cumplimiento 23% (mín. 50%); Pausa 28 d (máx. 10 d); Recencia 0% (mín. 50%) |
-| Juan Ignacio Cruzado | 9 | 41% | 23 d | 50% | **34** | No aprueba | Cumplimiento 41% (mín. 50%); Pausa 23 d (máx. 10 d) |
+| Juan Ignacio Cruzado | 10 | 45% | 23 d | 93% | **43** | No aprueba | Cumplimiento 45% (mín. 50%); Pausa 23 d (máx. 10 d) |
 
 > Para aprobar el IC: **2 sesiones por semana** sostenidas, sin pausas mayores a **10 días** y con actividad en las **últimas 2 semanas**. Se excluyen merges, bots y al docente. Zona horaria UTC-3.
 
@@ -52,7 +50,7 @@ Cada aspecto indica **qué mide**, **por qué importa** y **tu resultado**. Cuan
 
 - **Qué mide:** Un resumen numérico (0-100) que combina todas las señales y métricas del análisis, con topes duros por duplicación.
 - **Por qué importa:** Ordena y prioriza la revisión: un índice bajo indica varias señales que conviene mirar juntas.
-- **Tu resultado:** índice **39/100** _(mínimo 60)_
+- **Tu resultado:** índice **41/100** _(mínimo 60)_
 - **Para investigar la causa:**
     - ¿En qué momento del proyecto se concentraron los problemas (arranque, integración de partes, cierre)?
     - ¿El índice bajó por muchas señales chicas o por una o dos graves?
@@ -62,7 +60,7 @@ Cada aspecto indica **qué mide**, **por qué importa** y **tu resultado**. Cuan
 
 - **Qué mide:** Porcentaje de bloques de código repetidos (similitud) en el repositorio.
 - **Por qué importa:** Cada copia se mantiene por separado: un arreglo hay que repetirlo y los defectos se multiplican.
-- **Tu resultado:** **22.3%** de duplicación _(máximo 15%)_
+- **Tu resultado:** **22.1%** de duplicación _(máximo 15%)_
 - **Para investigar la causa:**
     - ¿El trabajo se repartió por pantallas o archivos y se integró copiando y pegando bloques?
     - ¿Qué zonas del sistema cambiaron juntas más de una vez (señal de lógica compartida)?
@@ -108,7 +106,7 @@ Cada aspecto indica **qué mide**, **por qué importa** y **tu resultado**. Cuan
 
 - **Qué mide:** Componentes de UI muy extensos, que suelen mezclar render, estado y lógica.
 - **Por qué importa:** Son difíciles de leer, probar y reutilizar, y sus cambios tienen efectos inesperados.
-- **Tu resultado:** **5** componente(s) demasiado grande(s) _(máximo 1)_
+- **Tu resultado:** **4** componente(s) demasiado grande(s) _(máximo 1)_
 - **Para investigar la causa:**
     - ¿El componente creció a medida que se agregaban requisitos, sin volver a dividirlo?
     - ¿Mezcla responsabilidades distintas (mostrar, calcular, pedir datos)?
@@ -124,7 +122,7 @@ Cada aspecto indica **qué mide**, **por qué importa** y **tu resultado**. Cuan
 
 - **Qué mide:** Complejidad ciclomática: cantidad de caminos posibles dentro de una función (condicionales, bucles, casos).
 - **Por qué importa:** Muchos caminos = difícil de seguir y de probar; suelen esconderse casos sin cubrir.
-- **Tu resultado:** **0** bloque(s) de complejidad alta _(máximo 5 por 1000 LOC (tenés 2400 LOC))_
+- **Tu resultado:** **0** bloque(s) de complejidad alta _(máximo 5 por 1000 LOC (tenés 2507 LOC))_
 
 ### 12. Funciones/métodos largos o con muchos parámetros (Tam) — OK
 
@@ -138,21 +136,11 @@ Cada aspecto indica **qué mide**, **por qué importa** y **tu resultado**. Cuan
 - **Por qué importa:** Piezas muy enlazadas hacen que un cambio se propague y que sea difícil reemplazar partes.
 - **Tu resultado:** **0** unidad(es) con acoplamiento alto _(máximo 2 por 1000 LOC)_
 
-### 14. Cobertura de tests (Cob) — A REVISAR
-
-- **Qué mide:** Porcentaje de líneas de código ejecutadas por la suite de tests (cobertura real, no cantidad de archivos de test).
-- **Por qué importa:** Un test que existe pero no ejecuta el código no protege de nada: la cobertura muestra qué partes quedan sin verificar.
-- **Tu resultado:** **no medible** (sin tests, sin runner o sin artefacto de cobertura) _(mínimo 80% de líneas)_
-- **Para investigar la causa:**
-    - ¿Qué módulos o ramas del sistema nunca se ejecutan en los tests?
-    - ¿Los tests prueban el camino principal y los errores, o solo el caso feliz?
-    - ¿La suite se puede correr en CI sin base de datos ni servicios externos?
-
-### 15. Vistas del frontend (Vistas) — OK
+### 14. Vistas del frontend (Vistas) — OK
 
 - **Qué mide:** Cantidad de vistas/componentes de pantalla del frontend.
 - **Por qué importa:** El frontend se mide por pantallas: pocas vistas sugiere poca cobertura de la interfaz pedida.
-- **Tu resultado:** **17** vista(s)/componente(s) _(mínimo 8)_
+- **Tu resultado:** **18** vista(s)/componente(s) _(mínimo 8)_
 
 ## 5. Qué falta para aprobar
 
@@ -160,10 +148,9 @@ Criterios que hoy están en rojo y qué habría que cambiar para alcanzar el niv
 
 | Criterio | Resultado actual | Meta | Qué arreglar |
 |---|---|---|---|
-| Índice de calidad de servicios (indice) | índice **39/100** | mínimo 60 | Subir el índice a ≥60 corrigiendo primero las señales de más peso: duplicación, secretos, SQL y capas. |
-| Duplicación (DRY) (duplicacion) | **22.3%** de duplicación | máximo 15% | Unificar los bloques repetidos en un módulo o función compartida; apuntar a ≤15%. |
-| Componente demasiado grande (BigC) | **5** componente(s) demasiado grande(s) | máximo 1 | Dividir el componente por responsabilidad en subcomponentes; ≤1 componente grande. |
-| Cobertura de tests (Cob) | **no medible** (sin tests, sin runner o sin artefacto de cobertura) | mínimo 80% de líneas | Publicar cobertura (o correr la suite con coverage) y cubrir ≥80% de líneas. |
+| Índice de calidad de servicios (indice) | índice **41/100** | mínimo 60 | Subir el índice a ≥60 corrigiendo primero las señales de más peso: duplicación, secretos, SQL y capas. |
+| Duplicación (DRY) (duplicacion) | **22.1%** de duplicación | máximo 15% | Unificar los bloques repetidos en un módulo o función compartida; apuntar a ≤15%. |
+| Componente demasiado grande (BigC) | **4** componente(s) demasiado grande(s) | máximo 1 | Dividir el componente por responsabilidad en subcomponentes; ≤1 componente grande. |
 
 > Empezá por las señales de seguridad (**SEC**, **SQL**) y por la **duplicación**: son las que más pesan en el índice y las más rápidas de verificar a ojo.
 
@@ -171,8 +158,7 @@ Criterios que hoy están en rojo y qué habría que cambiar para alcanzar el niv
 
 Archivos donde el análisis encontró cada señal en rojo (sin número de línea, a propósito):
 
-**Componente demasiado grande (BigC)** — 5 archivo(s):
-- `src/components/PetClinicalHistory.vue`
+**Componente demasiado grande (BigC)** — 4 archivo(s):
 - `src/views/PetCreateView.vue`
 - `src/views/PetDetailView.vue`
 - `src/views/PetEditView.vue`

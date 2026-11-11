@@ -29,8 +29,9 @@
 
 | Autor | Commits | Código (LOC) | Tests (LOC) | Docs (LOC) | Días activos | % del código |
 |---|---:|---:|---:|---:|---:|---:|
-| juanmasecchi | 20 | 2,461 | 0 | 5 | 8 | 58% |
+| juanmasecchi | 20 | 2,461 | 0 | 5 | 9 | 58% |
 | Juan Ignacio Cruzado | 15 | 1,751 | 69 | 54 | 5 | 42% |
+| Juan Martín Rodríguez Secchi | 0 | 0 | 0 | 0 | 0 | 0% |
 
 > _El LOC de autoría lo calcula RepoSense sobre el historial y puede diferir del LOC de código del análisis de calidad (que mira solo el estado de `main`)._
 
@@ -40,8 +41,9 @@
 
 | Alumno | Sesiones | Cumplimiento | Pausa | Recencia | IC | Nivel | Para subir de nivel |
 |---|--:|--:|--:|--:|--:|--|--|
-| juanmasecchi | 5 | 22% | 28 d | 0% | **14** | No aprueba | Cumplimiento 22% (mín. 50%); Recencia 0% (mín. 50%) |
-| Juan Ignacio Cruzado | 11 | 48% | 23 d | 14% | **33** | No aprueba | Cumplimiento 48% (mín. 50%); Recencia 14% (mín. 50%) |
+| juanmasecchi | 5 | 19% | 28 d | 0% | **13** | No aprueba | Cumplimiento 19% (mín. 50%); Recencia 0% (mín. 50%) |
+| Juan Ignacio Cruzado | 11 | 43% | 23 d | 14% | **30** | No aprueba | Cumplimiento 43% (mín. 50%); Recencia 14% (mín. 50%) |
+| Juan Martín Rodríguez Secchi | 1 | 4% | 0 d | 64% | **33** | Muestra insuficiente | ≥3 sesiones y ≥2 semanas de período |
 
 > Para aprobar el IC: **2 sesiones por semana** sostenidas, sin pausas mayores a **10 días** y con actividad en las **últimas 2 semanas**. Se excluyen merges, bots y al docente. Zona horaria UTC-3.
 
@@ -165,11 +167,11 @@ Cada aspecto indica **qué mide**, **por qué importa** y **tu resultado**. Cuan
 
 ## 6. Actividad en clase (miércoles y viernes)
 
-> Se consideran las **23 clases** del período (miércoles y viernes, según `config/constancia.json`; feriados y semanas sin clase descontados). `Commits` = commits de trabajo (no-merge); `Merges` = merges de PR (también son push). Los días sin actividad dicen **sin actividad**.
+> Se consideran las **26 clases** del período (miércoles y viernes, según `config/constancia.json`; feriados y semanas sin clase descontados). `Commits` = commits de trabajo (no-merge); `Merges` = merges de PR (también son push). Los días sin actividad dicen **sin actividad**.
 
 ### Juan Ignacio Cruzado
 
-**13/23 clases con actividad** · 43 commits · 27 merges
+**13/26 clases con actividad** · 43 commits · 27 merges
 
 | Fecha | Actividad | Repositorios | Commits / merges |
 |---|:--:|---|--:|
@@ -196,10 +198,46 @@ Cada aspecto indica **qué mide**, **por qué importa** y **tu resultado**. Cuan
 | 2026-10-23 | No | sin actividad | 0 / 0 |
 | 2026-10-28 | **Sí** | B-Profesional, F-profesional | 4 / 1 |
 | 2026-10-30 | **Sí** | B-Profesional | 2 / 0 |
+| 2026-11-04 | No | sin actividad | 0 / 0 |
+| 2026-11-06 | No | sin actividad | 0 / 0 |
+| 2026-11-11 | No | sin actividad | 0 / 0 |
+
+### Juan Martín Rodríguez Secchi
+
+**1/26 clases con actividad** · 3 commits · 0 merges
+
+| Fecha | Actividad | Repositorios | Commits / merges |
+|---|:--:|---|--:|
+| 2026-08-14 | No | sin actividad | 0 / 0 |
+| 2026-08-19 | No | sin actividad | 0 / 0 |
+| 2026-08-21 | No | sin actividad | 0 / 0 |
+| 2026-08-26 | No | sin actividad | 0 / 0 |
+| 2026-08-28 | No | sin actividad | 0 / 0 |
+| 2026-09-02 | No | sin actividad | 0 / 0 |
+| 2026-09-04 | No | sin actividad | 0 / 0 |
+| 2026-09-09 | No | sin actividad | 0 / 0 |
+| 2026-09-11 | No | sin actividad | 0 / 0 |
+| 2026-09-16 | No | sin actividad | 0 / 0 |
+| 2026-09-18 | No | sin actividad | 0 / 0 |
+| 2026-09-23 | No | sin actividad | 0 / 0 |
+| 2026-09-25 | No | sin actividad | 0 / 0 |
+| 2026-09-30 | No | sin actividad | 0 / 0 |
+| 2026-10-02 | No | sin actividad | 0 / 0 |
+| 2026-10-07 | No | sin actividad | 0 / 0 |
+| 2026-10-09 | No | sin actividad | 0 / 0 |
+| 2026-10-14 | No | sin actividad | 0 / 0 |
+| 2026-10-16 | No | sin actividad | 0 / 0 |
+| 2026-10-21 | No | sin actividad | 0 / 0 |
+| 2026-10-23 | No | sin actividad | 0 / 0 |
+| 2026-10-28 | No | sin actividad | 0 / 0 |
+| 2026-10-30 | No | sin actividad | 0 / 0 |
+| 2026-11-04 | No | sin actividad | 0 / 0 |
+| 2026-11-06 | **Sí** | B-Profesional, F-profesional | 3 / 0 |
+| 2026-11-11 | No | sin actividad | 0 / 0 |
 
 ### juanmasecchi
 
-**10/23 clases con actividad** · 27 commits · 39 merges
+**11/26 clases con actividad** · 27 commits · 41 merges
 
 | Fecha | Actividad | Repositorios | Commits / merges |
 |---|:--:|---|--:|
@@ -216,7 +254,7 @@ Cada aspecto indica **qué mide**, **por qué importa** y **tu resultado**. Cuan
 | 2026-09-18 | No | sin actividad | 0 / 0 |
 | 2026-09-23 | **Sí** | B-Profesional, F-profesional | 6 / 5 |
 | 2026-09-25 | **Sí** | B-Profesional | 3 / 2 |
-| 2026-09-30 | **Sí** | B-Profesional, F-profesional | 8 / 9 |
+| 2026-09-30 | **Sí** | B-Profesional, F-profesional | 8 / 8 |
 | 2026-10-02 | **Sí** | F-profesional | 7 / 7 |
 | 2026-10-07 | **Sí** | F-profesional | 0 / 3 |
 | 2026-10-09 | No | sin actividad | 0 / 0 |
@@ -226,6 +264,9 @@ Cada aspecto indica **qué mide**, **por qué importa** y **tu resultado**. Cuan
 | 2026-10-23 | No | sin actividad | 0 / 0 |
 | 2026-10-28 | **Sí** | F-profesional | 0 / 3 |
 | 2026-10-30 | **Sí** | B-Profesional | 0 / 2 |
+| 2026-11-04 | No | sin actividad | 0 / 0 |
+| 2026-11-06 | No | sin actividad | 0 / 0 |
+| 2026-11-11 | **Sí** | B-Profesional, F-profesional | 0 / 3 |
 
 ## 7. Anexo: dónde mirar
 

@@ -6,53 +6,18 @@
       <p class="auth-subtitle">Completa tus datos para registrarte.</p>
 
       <form class="login-form" @submit.prevent="handleSubmit" novalidate>
-        <div class="form-group">
-          <label for="name">Nombre</label>
-          <input
-            id="name"
-            v-model.trim="form.name"
-            type="text"
-            placeholder="Tu nombre completo"
-            autocomplete="name"
-            :disabled="isSubmitting"
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="email">Correo electrónico</label>
-          <input
-            id="email"
-            v-model.trim="form.email"
-            type="email"
-            placeholder="usuario@ejemplo.com"
-            autocomplete="email"
-            :disabled="isSubmitting"
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="password">Contraseña</label>
-          <input
-            id="password"
-            v-model="form.password"
-            type="password"
-            placeholder="••••••••"
-            autocomplete="new-password"
-            :disabled="isSubmitting"
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="confirmPassword">Confirmar contraseña</label>
-          <input
-            id="confirmPassword"
-            v-model="form.confirmPassword"
-            type="password"
-            placeholder="Repite tu contraseña"
-            autocomplete="new-password"
-            :disabled="isSubmitting"
-          />
-        </div>
+        <AuthField
+          v-for="field in fields"
+          :id="field.id"
+          :key="field.id"
+          v-model="form[field.id]"
+          :label="field.label"
+          :type="field.type"
+          :autocomplete="field.autocomplete"
+          :placeholder="field.placeholder"
+          :disabled="isSubmitting"
+          :trim="field.trim"
+        />
 
         <p v-if="errorMessage" class="error-message" role="alert">
           {{ errorMessage }}
@@ -74,9 +39,24 @@
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { apiRegister, getApiErrorMessage } from '../api/http'
+import AuthField from '../components/AuthField.vue'
+import { validateRegisterForm } from '../utils/authValidation'
 import { runWithSuccessMessage } from '../utils/successMessage'
 
 const router = useRouter()
+
+const fields = [
+  { id: 'name', label: 'Nombre', type: 'text', autocomplete: 'name', placeholder: 'Tu nombre completo', trim: true },
+  { id: 'email', label: 'Correo electrónico', type: 'email', autocomplete: 'email', placeholder: 'usuario@ejemplo.com', trim: true },
+  { id: 'password', label: 'Contraseña', type: 'password', autocomplete: 'new-password', placeholder: '••••••••' },
+  {
+    id: 'confirmPassword',
+    label: 'Confirmar contraseña',
+    type: 'password',
+    autocomplete: 'new-password',
+    placeholder: 'Repite tu contraseña'
+  }
+]
 
 const form = reactive({
   name: '',
@@ -89,32 +69,8 @@ const errorMessage = ref('')
 const isSubmitting = ref(false)
 
 const validateForm = () => {
-  const { name, email, password, confirmPassword } = form
-
-  if (!name.trim()) {
-    throw new Error('El nombre es obligatorio.')
-  }
-
-  if (!email.trim()) {
-    throw new Error('El email es obligatorio.')
-  }
-
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  if (!emailRegex.test(email.trim())) {
-    throw new Error('Introduce un email válido.')
-  }
-
-  if (!password) {
-    throw new Error('La contraseña es obligatoria.')
-  }
-
-  if (!confirmPassword) {
-    throw new Error('Debes confirmar la contraseña.')
-  }
-
-  if (password !== confirmPassword) {
-    throw new Error('Las contraseñas no coinciden.')
-  }
+  const validationError = validateRegisterForm(form)
+  if (validationError) throw new Error(validationError)
 }
 
 const handleSubmit = async () => {

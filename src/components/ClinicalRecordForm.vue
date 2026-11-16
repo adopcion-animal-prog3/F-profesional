@@ -84,26 +84,11 @@
 import { reactive, ref } from 'vue'
 
 const props = defineProps({
-  petId: {
-    type: [Number, String],
-    required: true
-  },
-  petName: {
-    type: String,
-    required: true
-  },
-  isSubmitting: {
-    type: Boolean,
-    default: false
-  },
-  submitError: {
-    type: String,
-    default: ''
-  },
-  record: {
-    type: Object,
-    default: null
-  }
+  petId: { type: [Number, String], required: true },
+  petName: { type: String, required: true },
+  isSubmitting: { type: Boolean, default: false },
+  submitError: { type: String, default: '' },
+  record: { type: Object, default: null }
 })
 
 const emit = defineEmits(['cancel', 'submit'])

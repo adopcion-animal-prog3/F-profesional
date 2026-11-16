@@ -8,142 +8,54 @@
 
       <div class="header-actions">
         <router-link class="primary-button small-button" to="/mascotas/nueva">Nueva mascota</router-link>
-        <button class="primary-button small-button" type="button" @click="loadPets" :disabled="isLoading">
+        <button class="primary-button small-button" type="button" @click="load" :disabled="isLoading">
           {{ isLoading ? (hasLoadedSuccessfully ? 'Actualizando...' : 'Cargando...') : 'Actualizar' }}
         </button>
       </div>
     </div>
 
-    <div v-if="isLoading && !hasLoadedSuccessfully" class="state-block loading-state">
-      <div class="spinner" aria-label="Cargando mascotas"></div>
-      <p>Cargando mascotas...</p>
-    </div>
-
-    <div v-else-if="errorMessage && !hasLoadedSuccessfully" class="state-block error-state">
-      <h2>No se pudo cargar la lista</h2>
-      <p>{{ errorMessage }}</p>
-      <button class="primary-button small-button" type="button" @click="loadPets">
-        Reintentar
-      </button>
-    </div>
-
-    <p v-if="isLoading && hasLoadedSuccessfully" class="loading-inline" role="status">
-      <span class="spinner" aria-hidden="true"></span>
-      Actualizando mascotas...
-    </p>
-
-    <p v-if="errorMessage && hasLoadedSuccessfully" class="error-message" role="alert">
-      No se pudo actualizar la lista: {{ errorMessage }}
-    </p>
-
-    <div v-if="hasLoadedSuccessfully && pets.length === 0" class="state-block empty-state">
-      <h2>No hay mascotas disponibles</h2>
-      <p>En este momento no registramos animales en adopción.</p>
-    </div>
+    <ResourceStatus
+      :is-loading="isLoading"
+      :has-loaded="hasLoadedSuccessfully"
+      :error-message="errorMessage"
+      :is-empty="pets.length === 0"
+      resource-name="mascotas"
+      error-title="No se pudo cargar la lista"
+      refresh-error-prefix="No se pudo actualizar la lista"
+      empty-title="No hay mascotas disponibles"
+      empty-text="En este momento no registramos animales en adopción."
+      @retry="load"
+    />
 
     <div v-if="pets.length > 0" class="pets-grid">
-      <article v-for="pet in pets" :key="pet.id" class="pet-card">
-        <div class="pet-image" :class="getPetTone(pet)">
-          <span>{{ getPetInitials(pet.name) }}</span>
-        </div>
-
-        <div class="pet-body">
-          <div class="pet-header">
-            <h2>{{ pet.name }}</h2>
-            <span class="status-tag" :class="getStatusClass(pet.status)">{{ pet.status }}</span>
-          </div>
-
-          <ul class="pet-meta">
-            <li><strong>Especie:</strong> {{ pet.species }}</li>
-            <li><strong>Raza:</strong> {{ pet.breed }}</li>
-            <li><strong>Edad:</strong> {{ pet.age }}</li>
-            <li><strong>Sexo:</strong> {{ pet.gender }}</li>
-            <li><strong>Ubicación:</strong> {{ pet.location }}</li>
-          </ul>
-
-          <p class="pet-description">{{ pet.description }}</p>
-
-          <router-link class="text-link" :to="{ name: 'mascota-detalle', params: { id: pet.id } }">
-            Ver detalle
-          </router-link>
-        </div>
-      </article>
+      <PetCard v-for="pet in pets" :key="pet.id" :pet="pet" />
     </div>
 
-    <p v-if="isDemoMode" class="demo-banner">
+    <p v-if="source === 'demo'" class="demo-banner">
       Modo demostración: la API no respondió y se muestran mascotas de ejemplo.
     </p>
   </section>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted } from 'vue'
 import { apiGetPets } from '../api/http'
+import PetCard from '../components/PetCard.vue'
+import ResourceStatus from '../components/ResourceStatus.vue'
+import { useResourceList } from '../composables/useResourceList'
+import { normalizePet } from '../utils/petDisplay'
 
-const pets = ref([])
-const isLoading = ref(false)
-const hasLoadedSuccessfully = ref(false)
-const errorMessage = ref('')
-const isDemoMode = ref(false)
-
-const normalizePet = (pet, index) => ({
-  id: pet.id ?? pet._id ?? index + 1,
-  name: pet.name ?? pet.nombre ?? 'Mascota sin nombre',
-  species: pet.species ?? pet.especie ?? pet.type ?? 'No especificada',
-  breed: pet.breed ?? pet.raza ?? 'Sin raza',
-  age: pet.age ?? pet.edad ?? 'Edad no informada',
-  gender: pet.gender ?? pet.sexo ?? 'No informado',
-  status: pet.status ?? pet.estado ?? 'Disponible',
-  location: pet.location ?? pet.ubicacion ?? pet.city ?? pet.ciudad ?? 'Sin ubicación',
-  description:
-    pet.description ??
-    pet.descripcion ??
-    'Mascota en adopción con seguimiento veterinario.'
+const {
+  items: pets,
+  isLoading,
+  hasLoadedSuccessfully,
+  errorMessage,
+  source,
+  load
+} = useResourceList(apiGetPets, {
+  normalize: (pet, index) => normalizePet(pet, index + 1),
+  fallbackError: 'No se pudo cargar la lista de mascotas.'
 })
 
-const getPetInitials = (name = '') =>
-  name
-    .split(' ')
-    .map((part) => part[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase()
-
-const getPetTone = (pet) => {
-  const species = (pet.species || '').toLowerCase()
-
-  if (species.includes('perro')) return 'tone-dog'
-  if (species.includes('gato')) return 'tone-cat'
-  if (species.includes('conejo')) return 'tone-rabbit'
-
-  return 'tone-default'
-}
-
-const getStatusClass = (status = '') =>
-  status
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, '-')
-
-const loadPets = async () => {
-  if (isLoading.value) return
-
-  isLoading.value = true
-  errorMessage.value = ''
-
-  try {
-    const result = await apiGetPets()
-    const items = Array.isArray(result?.data) ? result.data : []
-
-    pets.value = items.map(normalizePet)
-    isDemoMode.value = result?.source === 'demo'
-    hasLoadedSuccessfully.value = true
-  } catch (error) {
-    errorMessage.value = error.message || 'No se pudo cargar la lista de mascotas.'
-  } finally {
-    isLoading.value = false
-  }
-}
-
-onMounted(loadPets)
+onMounted(load)
 </script>

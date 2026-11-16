@@ -1,3 +1,5 @@
+import { formatDateTime } from './date.js'
+
 export const normalizeClinicalHistoryRecord = (record, index) => {
   const veterinarian = record.veterinario ?? record.veterinarian ?? record.doctor
   const veterinarianName = typeof veterinarian === 'string'
@@ -13,12 +15,4 @@ export const normalizeClinicalHistoryRecord = (record, index) => {
   }
 }
 
-export const formatClinicalHistoryDate = (value) => {
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return String(value)
-
-  return new Intl.DateTimeFormat('es-AR', {
-    dateStyle: 'medium',
-    timeStyle: 'short'
-  }).format(date)
-}
+export const formatClinicalHistoryDate = (value) => formatDateTime(value)

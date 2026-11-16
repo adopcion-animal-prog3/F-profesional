@@ -6,29 +6,25 @@
       <p class="auth-subtitle">Introduce tus credenciales para continuar.</p>
 
       <form class="login-form" @submit.prevent="handleSubmit" novalidate>
-        <div class="form-group">
-          <label for="email">Correo electrónico</label>
-          <input
-            id="email"
-            v-model.trim="form.email"
-            type="email"
-            autocomplete="email"
-            placeholder="usuario@ejemplo.com"
-            :disabled="isSubmitting"
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="password">Contraseña</label>
-          <input
-            id="password"
-            v-model="form.password"
-            type="password"
-            autocomplete="current-password"
-            placeholder="••••••••"
-            :disabled="isSubmitting"
-          />
-        </div>
+        <AuthField
+          id="email"
+          v-model="form.email"
+          label="Correo electrónico"
+          type="email"
+          autocomplete="email"
+          placeholder="usuario@ejemplo.com"
+          :disabled="isSubmitting"
+          trim
+        />
+        <AuthField
+          id="password"
+          v-model="form.password"
+          label="Contraseña"
+          type="password"
+          autocomplete="current-password"
+          placeholder="••••••••"
+          :disabled="isSubmitting"
+        />
 
         <p v-if="errorMessage" class="error-message" role="alert">
           {{ errorMessage }}
@@ -52,6 +48,8 @@ import { computed, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { apiLogin, getApiErrorMessage } from '../api/http'
 import { saveSession } from '../auth/session'
+import AuthField from '../components/AuthField.vue'
+import { validateLoginForm } from '../utils/authValidation'
 import { runWithSuccessMessage } from '../utils/successMessage'
 
 const router = useRouter()
@@ -69,17 +67,8 @@ const isFormValid = computed(() => {
 })
 
 const validateForm = () => {
-  const email = form.email.trim()
-  const password = form.password.trim()
-
-  if (!email || !password) {
-    throw new Error('Debes completar todos los campos.')
-  }
-
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  if (!emailRegex.test(email)) {
-    throw new Error('Introduce un correo electrónico válido.')
-  }
+  const validationError = validateLoginForm(form)
+  if (validationError) throw new Error(validationError)
 }
 
 const handleSubmit = async () => {

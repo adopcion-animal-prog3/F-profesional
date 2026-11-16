@@ -1,67 +1,20 @@
 <template>
   <section class="pet-detail-view">
-    <div v-if="isLoading" class="state-block loading-state">
-      <div class="spinner" aria-label="Cargando detalle de mascota"></div>
-      <p>Cargando detalle de la mascota...</p>
-    </div>
+    <PetLoadState
+      v-if="isLoading || notFound || errorMessage"
+      :is-loading="isLoading"
+      :not-found="notFound"
+      :error-message="errorMessage"
+      :pet-id="route.params.id"
+      loading-label="Cargando detalle de mascota"
+      loading-text="detalle de la mascota"
+    />
 
-    <div v-else-if="notFound" class="state-block empty-state">
-      <h1>Mascota no encontrada</h1>
-      <p>No existe ninguna mascota con el ID {{ route.params.id }}.</p>
-      <div class="nav-links">
-        <router-link to="/mascotas">Volver al listado</router-link>
-      </div>
-    </div>
-
-    <div v-else-if="errorMessage" class="state-block error-state">
-      <h1>No se pudo cargar la mascota</h1>
-      <p>{{ errorMessage }}</p>
-      <div class="nav-links">
-        <router-link to="/mascotas">Volver al listado</router-link>
-      </div>
-    </div>
-
-    <article v-else class="detail-card">
-      <div class="detail-hero" :class="getPetTone(pet)">
-        <span>{{ getPetInitials(pet.name) }}</span>
-      </div>
+    <article v-else-if="pet" class="detail-card">
+      <PetAvatar :pet="pet" base-class="detail-hero" />
 
       <div class="detail-body">
-        <div class="detail-header">
-          <div>
-            <p class="eyebrow">Ficha de mascota</p>
-            <h1>{{ pet.name }}</h1>
-          </div>
-          <span class="status-tag" :class="getStatusClass(pet.status)">{{ pet.status }}</span>
-        </div>
-
-        <div class="detail-grid">
-          <div class="detail-item">
-            <span class="label">Especie</span>
-            <strong>{{ pet.species }}</strong>
-          </div>
-          <div class="detail-item">
-            <span class="label">Raza</span>
-            <strong>{{ pet.breed }}</strong>
-          </div>
-          <div class="detail-item">
-            <span class="label">Edad</span>
-            <strong>{{ pet.age }}</strong>
-          </div>
-          <div class="detail-item">
-            <span class="label">Sexo</span>
-            <strong>{{ pet.gender }}</strong>
-          </div>
-          <div class="detail-item wide">
-            <span class="label">Ubicación</span>
-            <strong>{{ pet.location }}</strong>
-          </div>
-        </div>
-
-        <div class="detail-description">
-          <h2>Descripción</h2>
-          <p>{{ pet.description }}</p>
-        </div>
+        <PetProfile :pet="pet" />
 
         <PetClinicalHistory :pet-id="pet.id" :pet-name="pet.name" />
 
@@ -90,84 +43,30 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { apiDeletePetById } from '../api/http'
+import PetAvatar from '../components/PetAvatar.vue'
 import PetClinicalHistory from '../components/PetClinicalHistory.vue'
-import { apiDeletePetById, apiGetPetById } from '../api/http'
-import { runWithSuccessMessage } from '../utils/successMessage'
+import PetLoadState from '../components/PetLoadState.vue'
+import PetProfile from '../components/PetProfile.vue'
+import { useAsyncAction } from '../composables/useAsyncAction'
+import { usePetById } from '../composables/usePetById'
+import { normalizePet } from '../utils/petDisplay'
 
 const route = useRoute()
 const router = useRouter()
 const pet = ref(null)
-const isLoading = ref(true)
-const notFound = ref(false)
-const errorMessage = ref('')
-const isDeleting = ref(false)
-const deleteError = ref('')
 
-const normalizePet = (item) => ({
-  id: item.id ?? item._id ?? route.params.id,
-  name: item.name ?? item.nombre ?? 'Mascota sin nombre',
-  species: item.species ?? item.especie ?? item.type ?? 'No especificada',
-  breed: item.breed ?? item.raza ?? 'Sin raza',
-  age: item.age ?? item.edad ?? 'Edad no informada',
-  gender: item.gender ?? item.sexo ?? 'No informado',
-  status: item.status ?? item.estado ?? 'Disponible',
-  location: item.location ?? item.ubicacion ?? item.city ?? item.ciudad ?? 'Sin ubicación',
-  description:
-    item.description ??
-    item.descripcion ??
-    'Mascota en adopción con seguimiento veterinario.'
+const { isLoading, notFound, errorMessage } = usePetById(() => route.params.id, {
+  onLoaded: (data) => {
+    pet.value = normalizePet(data, route.params.id)
+    localStorage.setItem('selected_pet', JSON.stringify(pet.value))
+  },
+  fallbackError: 'No se pudo cargar la mascota solicitada.'
 })
 
-const getPetInitials = (name = '') =>
-  name
-    .split(' ')
-    .map((part) => part[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase()
-
-const getPetTone = (item) => {
-  const species = (item?.species || '').toLowerCase()
-
-  if (species.includes('perro')) return 'tone-dog'
-  if (species.includes('gato')) return 'tone-cat'
-  if (species.includes('conejo')) return 'tone-rabbit'
-
-  return 'tone-default'
-}
-
-const getStatusClass = (status = '') =>
-  status
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, '-')
-
-const loadPet = async () => {
-  const petId = route.params.id
-
-  isLoading.value = true
-  notFound.value = false
-  errorMessage.value = ''
-  pet.value = null
-
-  try {
-    const result = await apiGetPetById(petId)
-
-    if (result?.notFound || !result?.data) {
-      notFound.value = true
-      return
-    }
-
-    pet.value = normalizePet(result.data)
-    localStorage.setItem('selected_pet', JSON.stringify(pet.value))
-  } catch (error) {
-    errorMessage.value = error.message || 'No se pudo cargar la mascota solicitada.'
-  } finally {
-    isLoading.value = false
-  }
-}
+const { isRunning: isDeleting, errorMessage: deleteError, run } = useAsyncAction()
 
 const handleDelete = async () => {
   if (!pet.value?.id || isDeleting.value) return
@@ -175,29 +74,14 @@ const handleDelete = async () => {
   const confirmed = window.confirm(
     `¿Seguro que querés eliminar a ${pet.value.name}? Esta acción no se puede deshacer.`
   )
-
   if (!confirmed) return
 
-  isDeleting.value = true
-  deleteError.value = ''
+  const deleted = await run({
+    operation: () => apiDeletePetById(pet.value.id),
+    successMessage: 'Mascota eliminada correctamente.',
+    fallbackError: 'No se pudo eliminar la mascota.'
+  })
 
-  try {
-    await runWithSuccessMessage(
-      () => apiDeletePetById(pet.value.id),
-      'Mascota eliminada correctamente.'
-    )
-    router.push('/mascotas')
-  } catch (error) {
-    deleteError.value = error.message || 'No se pudo eliminar la mascota.'
-  } finally {
-    isDeleting.value = false
-  }
+  if (deleted) router.push('/mascotas')
 }
-
-watch(
-  () => route.params.id,
-  () => loadPet(),
-  { immediate: true }
-)
-
 </script>

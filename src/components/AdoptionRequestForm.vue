@@ -1,9 +1,7 @@
 <template>
   <section class="adoption-request-form">
     <div class="selected-pet-card">
-      <div class="selected-pet-avatar" :class="getPetTone(pet)">
-        <span>{{ getPetInitials(pet.name) }}</span>
-      </div>
+      <PetAvatar :pet="pet" base-class="selected-pet-avatar" />
       <div>
         <p class="eyebrow">Mascota seleccionada</p>
         <h2>{{ pet.name }}</h2>
@@ -97,20 +95,13 @@
 
 <script setup>
 import { reactive, ref } from 'vue'
+import { isValidEmail } from '../utils/authValidation'
+import PetAvatar from './PetAvatar.vue'
 
 const props = defineProps({
-  pet: {
-    type: Object,
-    required: true
-  },
-  isSubmitting: {
-    type: Boolean,
-    default: false
-  },
-  submitError: {
-    type: String,
-    default: ''
-  }
+  pet: { type: Object, required: true },
+  isSubmitting: { type: Boolean, default: false },
+  submitError: { type: String, default: '' }
 })
 
 const emit = defineEmits(['cancel', 'submit'])
@@ -125,14 +116,12 @@ const form = reactive({
 const errors = ref({})
 const isReady = ref(false)
 
-const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
 const validate = () => {
   const nextErrors = {}
 
   if (!form.name.trim()) nextErrors.name = 'Introduce tu nombre completo.'
   if (!form.email.trim()) nextErrors.email = 'Introduce tu correo electrónico.'
-  else if (!emailPattern.test(form.email.trim())) nextErrors.email = 'Introduce un correo válido.'
+  else if (!isValidEmail(form.email)) nextErrors.email = 'Introduce un correo válido.'
   if (!form.phone.trim()) nextErrors.phone = 'Introduce un número de teléfono.'
   if (!form.message.trim()) nextErrors.message = 'Escribe un mensaje para la solicitud.'
   else if (form.message.trim().length < 10) nextErrors.message = 'El mensaje debe tener al menos 10 caracteres.'
@@ -151,22 +140,4 @@ const handleSubmit = () => {
 }
 
 const handleCancel = () => emit('cancel')
-
-const getPetInitials = (name = '') =>
-  name
-    .split(' ')
-    .map((part) => part[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase()
-
-const getPetTone = (pet) => {
-  const species = (pet?.species || '').toLowerCase()
-
-  if (species.includes('perro')) return 'tone-dog'
-  if (species.includes('gato')) return 'tone-cat'
-  if (species.includes('conejo')) return 'tone-rabbit'
-
-  return 'tone-default'
-}
 </script>

@@ -1,58 +1,8 @@
 import axios from 'axios'
 import { getAuthorizationHeader } from '../auth/session'
-
-const demoPets = [
-  {
-    id: 1,
-    name: 'Luna',
-    species: 'Perro',
-    breed: 'Mestizo',
-    age: '2 años',
-    gender: 'Hembra',
-    status: 'Disponible',
-    location: 'Córdoba',
-    description: 'Muy sociable, ideal para vivir con familias activas.'
-  },
-  {
-    id: 2,
-    name: 'Milo',
-    species: 'Gato',
-    breed: 'Siamés',
-    age: '1 año',
-    gender: 'Macho',
-    status: 'En tratamiento',
-    location: 'Mendoza',
-    description: 'Cariñoso y tranquilo, aprende rápido a convivir con otros animales.'
-  },
-  {
-    id: 3,
-    name: 'Nube',
-    species: 'Conejo',
-    breed: 'Mini Lop',
-    age: '10 meses',
-    gender: 'Hembra',
-    status: 'Disponible',
-    location: 'Buenos Aires',
-    description: 'Dócil y fácil de manejar, perfecto para hogares tranquilos.'
-  }
-]
-
-const normalizePetPayload = (payload) => {
-  if (!payload || typeof payload !== 'object') return null
-
-  if (payload.mascota) return payload.mascota
-  if (payload.pet) return payload.pet
-  if (payload.data && typeof payload.data === 'object') return payload.data
-
-  return payload
-}
-
-const normalizePetsPayload = (payload) => {
-  if (Array.isArray(payload)) return payload
-  if (payload && Array.isArray(payload.mascotas)) return payload.mascotas
-  if (payload && Array.isArray(payload.data)) return payload.data
-  return []
-}
+import { buildPetPayload } from '../utils/petForm'
+import { deleteDemoPet, findDemoPet, listDemoPets, updateDemoPet } from './demoPets'
+import { apiResult, getErrorKind, isNetworkFailure, normalizePetPayload, pickArray } from './normalizers'
 
 const apiErrorMessages = {
   validation: 'Revisá los datos ingresados e intentá nuevamente.',
@@ -65,21 +15,10 @@ const apiErrorMessages = {
 }
 
 const normalizeApiError = (error) => {
-  const status = error?.response?.status
-  let kind = 'unexpected'
-
-  if (status === 400 || status === 422) kind = 'validation'
-  else if (status === 401) kind = 'unauthorized'
-  else if (status === 403) kind = 'forbidden'
-  else if (status === 404) kind = 'notFound'
-  else if (status >= 500) kind = 'server'
-  else if (!error?.response || ['ERR_NETWORK', 'ECONNABORTED', 'ETIMEDOUT'].includes(error?.code)) {
-    kind = 'network'
-  }
-
+  const kind = getErrorKind(error)
   const normalizedError = new Error(apiErrorMessages[kind])
   normalizedError.name = 'ApiError'
-  normalizedError.status = status
+  normalizedError.status = error?.response?.status
   normalizedError.kind = kind
   normalizedError.code = error?.code
   return normalizedError
@@ -91,7 +30,7 @@ export const getApiErrorMessage = (error, context = 'general') => {
   }
 
   if (error?.kind && apiErrorMessages[error.kind]) return apiErrorMessages[error.kind]
-  if (error?.isAxiosError) return apiErrorMessages[normalizeApiError(error).kind]
+  if (error?.isAxiosError) return apiErrorMessages[getErrorKind(error)]
   if (error?.message && !/network error|timeout|failed to fetch/i.test(error.message)) {
     return error.message
   }
@@ -122,63 +61,44 @@ apiClient.interceptors.response.use(
   (error) => Promise.reject(normalizeApiError(error))
 )
 
-export const apiHealthCheck = () => apiClient.get('/health')
-export const apiLogin = (credentials) => apiClient.post('/api/auth/login', credentials)
-export const apiRegister = (userData) => apiClient.post('/api/auth/register', userData)
-export const apiCreatePet = async (petData) => {
-  const payload = {
-    name: petData.name?.trim(),
-    species: petData.species?.trim(),
-    breed: petData.breed?.trim(),
-    age: Number(petData.age),
-    gender: petData.gender?.trim(),
-    status: petData.status?.trim() || 'Disponible',
-    location: petData.location?.trim(),
-    description: petData.description?.trim()
-  }
-
-  return apiClient.post('/api/mascotas', payload)
-}
-
-export const apiGetPets = async () => {
+// Ejecuta la petición y, si falla por red, usa el respaldo de demostración.
+const withDemoFallback = async (request, demoFallback) => {
   try {
-    const response = await apiClient.get('/api/mascotas')
-
-    return {
-      source: 'api',
-      data: normalizePetsPayload(response.data)
-    }
+    return await request()
   } catch (error) {
-    const isOffline = typeof navigator !== 'undefined' && !navigator.onLine
-    const isNetworkFailure =
-      error?.kind === 'network' ||
-      error?.code === 'ERR_NETWORK' ||
-      error?.message?.includes('Network') ||
-      isOffline
-
-    if (isNetworkFailure) {
-      return {
-        source: 'demo',
-        data: demoPets
-      }
-    }
-
+    if (isNetworkFailure(error)) return demoFallback()
     throw error
   }
 }
 
+const rethrowNotFound = (message) => (error) => {
+  if (error?.status === 404) throw new Error(message)
+  throw error
+}
+
+const petPath = (petId) => `/api/mascotas/${petId}`
+const historyPath = (petId) => `/api/mascotas/${encodeURIComponent(petId)}/historial`
+const clinicalRecordPath = (recordId) => `/api/historial/${encodeURIComponent(recordId)}`
+
+const buildClinicalPayload = (recordData) => ({
+  descripcion: recordData.descripcion.trim(),
+  veterinario: recordData.veterinario?.trim() || null
+})
+
+export const apiHealthCheck = () => apiClient.get('/health')
+export const apiLogin = (credentials) => apiClient.post('/api/auth/login', credentials)
+export const apiRegister = (userData) => apiClient.post('/api/auth/register', userData)
+export const apiCreatePet = async (petData) => apiClient.post('/api/mascotas', buildPetPayload(petData))
+
+export const apiGetPets = () =>
+  withDemoFallback(
+    async () => apiResult(pickArray((await apiClient.get('/api/mascotas')).data, ['mascotas', 'data'])),
+    () => apiResult(listDemoPets(), 'demo')
+  )
+
 export const apiGetSolicitudes = async () => {
   const response = await apiClient.get('/api/solicitudes')
-
-  if (Array.isArray(response.data)) return { source: 'api', data: response.data }
-  if (Array.isArray(response.data?.solicitudes)) {
-    return { source: 'api', data: response.data.solicitudes }
-  }
-  if (Array.isArray(response.data?.data)) {
-    return { source: 'api', data: response.data.data }
-  }
-
-  return { source: 'api', data: [] }
+  return apiResult(pickArray(response.data, ['solicitudes', 'data']))
 }
 
 export const apiCreateAdoptionRequest = async (requestData) => {
@@ -191,189 +111,59 @@ export const apiCreateAdoptionRequest = async (requestData) => {
   }
 
   const response = await apiClient.post('/api/solicitudes', payload)
-  return { source: 'api', data: response.data }
+  return apiResult(response.data)
 }
 
 export const apiUpdateSolicitudStatus = (solicitudId, estado) =>
   apiClient.put(`/api/solicitudes/${solicitudId}`, { estado })
 
-export const apiGetPetById = async (petId) => {
-  try {
-    const response = await apiClient.get(`/api/mascotas/${petId}`)
-    const pet = normalizePetPayload(response.data)
+const petLookupResult = (pet, source = 'api') => ({ source, data: pet || null, notFound: !pet })
 
-    return {
-      source: 'api',
-      data: pet,
-      notFound: !pet
-    }
-  } catch (error) {
-    const isOffline = typeof navigator !== 'undefined' && !navigator.onLine
-    const isNetworkFailure =
-      error?.kind === 'network' ||
-      error?.code === 'ERR_NETWORK' ||
-      error?.message?.includes('Network') ||
-      isOffline
-
-    if (isNetworkFailure) {
-      const pet = demoPets.find((item) => String(item.id) === String(petId))
-
-      return {
-        source: 'demo',
-        data: pet || null,
-        notFound: !pet
-      }
-    }
-
-    if (error?.status === 404) {
-      return {
-        source: 'api',
-        data: null,
-        notFound: true
-      }
-    }
-
+export const apiGetPetById = (petId) =>
+  withDemoFallback(
+    async () => petLookupResult(normalizePetPayload((await apiClient.get(petPath(petId))).data)),
+    () => petLookupResult(findDemoPet(petId), 'demo')
+  ).catch((error) => {
+    if (error?.status === 404) return petLookupResult(null)
     throw error
-  }
-}
+  })
 
 export const apiGetPetHistory = async (petId) => {
-  const response = await apiClient.get(
-    `/api/mascotas/${encodeURIComponent(petId)}/historial`
-  )
-  const payload = response.data
-
-  if (Array.isArray(payload)) return payload
-  if (Array.isArray(payload?.historial)) return payload.historial
-  if (Array.isArray(payload?.history)) return payload.history
-  if (Array.isArray(payload?.data)) return payload.data
-
-  return []
+  const response = await apiClient.get(historyPath(petId))
+  return pickArray(response.data, ['historial', 'history', 'data'])
 }
 
 export const apiCreatePetHistory = async (petId, recordData) => {
-  const response = await apiClient.post(
-    `/api/mascotas/${encodeURIComponent(petId)}/historial`,
-    {
-      descripcion: recordData.descripcion.trim(),
-      veterinario: recordData.veterinario?.trim() || null
-    }
-  )
-
+  const response = await apiClient.post(historyPath(petId), buildClinicalPayload(recordData))
   return response.data
 }
 
 export const apiUpdateClinicalHistory = async (recordId, recordData) => {
-  const response = await apiClient.put(
-    `/api/historial/${encodeURIComponent(recordId)}`,
-    {
-      fecha_registro: recordData.fecha_registro,
-      descripcion: recordData.descripcion.trim(),
-      veterinario: recordData.veterinario?.trim() || null
-    }
-  )
-
+  const response = await apiClient.put(clinicalRecordPath(recordId), {
+    fecha_registro: recordData.fecha_registro,
+    ...buildClinicalPayload(recordData)
+  })
   return response.data
 }
 
 export const apiDeleteClinicalHistory = async (recordId) => {
-  const response = await apiClient.delete(
-    `/api/historial/${encodeURIComponent(recordId)}`
-  )
-
+  const response = await apiClient.delete(clinicalRecordPath(recordId))
   return response.data
 }
 
-export const apiUpdatePetById = async (petId, petData) => {
-  const payload = {
-    name: petData.name?.trim(),
-    species: petData.species?.trim(),
-    breed: petData.breed?.trim(),
-    age: Number(petData.age),
-    gender: petData.gender?.trim(),
-    status: petData.status?.trim() || 'Disponible',
-    location: petData.location?.trim(),
-    description: petData.description?.trim()
-  }
+export const apiUpdatePetById = (petId, petData) => {
+  const payload = buildPetPayload(petData)
 
-  try {
-    const response = await apiClient.put(`/api/mascotas/${petId}`, payload)
-    return {
-      source: 'api',
-      data: normalizePetPayload(response.data)
-    }
-  } catch (error) {
-    const isOffline = typeof navigator !== 'undefined' && !navigator.onLine
-    const isNetworkFailure =
-      error?.kind === 'network' ||
-      error?.code === 'ERR_NETWORK' ||
-      error?.message?.includes('Network') ||
-      isOffline
-
-    if (isNetworkFailure) {
-      const petIndex = demoPets.findIndex((item) => String(item.id) === String(petId))
-
-      if (petIndex === -1) {
-        throw new Error('La mascota no existe para actualizarla.')
-      }
-
-      const updatedPet = {
-        ...demoPets[petIndex],
-        ...payload,
-        id: Number(petId)
-      }
-
-      demoPets[petIndex] = updatedPet
-
-      return {
-        source: 'demo',
-        data: updatedPet
-      }
-    }
-
-    if (error?.status === 404) {
-      throw new Error('La mascota no existe.')
-    }
-
-    throw error
-  }
+  return withDemoFallback(
+    async () => apiResult(normalizePetPayload((await apiClient.put(petPath(petId), payload)).data)),
+    () => apiResult(updateDemoPet(petId, payload), 'demo')
+  ).catch(rethrowNotFound('La mascota no existe.'))
 }
 
-export const apiDeletePetById = async (petId) => {
-  try {
-    const response = await apiClient.delete(`/api/mascotas/${petId}`)
-    return {
-      source: 'api',
-      data: response.data ?? { deleted: true }
-    }
-  } catch (error) {
-    const isOffline = typeof navigator !== 'undefined' && !navigator.onLine
-    const isNetworkFailure =
-      error?.code === 'ERR_NETWORK' ||
-      error?.message?.includes('Network') ||
-      isOffline
-
-    if (isNetworkFailure) {
-      const petIndex = demoPets.findIndex((item) => String(item.id) === String(petId))
-
-      if (petIndex === -1) {
-        throw new Error('La mascota no existe para eliminarla.')
-      }
-
-      demoPets.splice(petIndex, 1)
-
-      return {
-        source: 'demo',
-        data: { deleted: true }
-      }
-    }
-
-    if (error?.status === 404) {
-      throw new Error('La mascota no existe.')
-    }
-
-    throw error
-  }
-}
+export const apiDeletePetById = (petId) =>
+  withDemoFallback(
+    async () => apiResult((await apiClient.delete(petPath(petId))).data ?? { deleted: true }),
+    () => apiResult(deleteDemoPet(petId), 'demo')
+  ).catch(rethrowNotFound('La mascota no existe.'))
 
 export default apiClient

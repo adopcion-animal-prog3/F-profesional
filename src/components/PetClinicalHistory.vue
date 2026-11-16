@@ -21,31 +21,19 @@
       @submit="createRecord"
     />
 
-    <div v-if="isLoading && !hasLoadedSuccessfully" class="state-block loading-state" aria-live="polite">
-      <div class="spinner" aria-label="Cargando historial clínico"></div>
-      <p>Cargando historial clínico...</p>
-    </div>
-
-    <div v-else-if="errorMessage && !hasLoadedSuccessfully" class="state-block error-state" role="alert">
-      <h3>No se pudo cargar el historial</h3>
-      <p>{{ errorMessage }}</p>
-      <button class="primary-button small-button" type="button" @click="loadHistory">
-        Reintentar
-      </button>
-    </div>
-
-    <p v-if="isRefreshing" class="loading-inline" role="status">
-      <span class="spinner" aria-hidden="true"></span>
-      Actualizando historial clínico...
-    </p>
-    <p v-if="errorMessage && hasLoadedSuccessfully" class="error-message" role="alert">
-      No se pudo actualizar el historial: {{ errorMessage }}
-    </p>
-
-    <div v-if="hasLoadedSuccessfully && records.length === 0" class="state-block empty-state">
-      <h3>Sin registros clínicos</h3>
-      <p>Esta mascota todavía no tiene registros en su historial.</p>
-    </div>
+    <ResourceStatus
+      :is-loading="isLoading || isRefreshing"
+      :has-loaded="hasLoadedSuccessfully"
+      :error-message="errorMessage"
+      :is-empty="records.length === 0"
+      resource-name="historial clínico"
+      error-title="No se pudo cargar el historial"
+      refresh-error-prefix="No se pudo actualizar el historial"
+      empty-title="Sin registros clínicos"
+      empty-text="Esta mascota todavía no tiene registros en su historial."
+      heading-tag="h3"
+      @retry="loadHistory"
+    />
 
     <ol v-if="records.length > 0" class="clinical-history-list">
       <li v-for="record in records" :key="record.id">
@@ -70,19 +58,15 @@ import { computed, ref, watch } from 'vue'
 import { apiCreatePetHistory, apiGetPetHistory } from '../api/http'
 import { getStoredUser } from '../auth/session'
 import { normalizeClinicalHistoryRecord } from '../utils/clinicalHistory'
+import { isAdminUser } from '../utils/solicitudes'
 import { runWithSuccessMessage } from '../utils/successMessage'
 import ClinicalRecordForm from './ClinicalRecordForm.vue'
 import ClinicalRecordItem from './ClinicalRecordItem.vue'
+import ResourceStatus from './ResourceStatus.vue'
 
 const props = defineProps({
-  petId: {
-    type: [Number, String],
-    required: true
-  },
-  petName: {
-    type: String,
-    required: true
-  }
+  petId: { type: [Number, String], required: true },
+  petName: { type: String, required: true }
 })
 
 const records = ref([])
@@ -94,7 +78,7 @@ const isFormOpen = ref(false)
 const isCreatingRecord = ref(false)
 const createErrorMessage = ref('')
 const editingRecordId = ref(null)
-const isAdmin = computed(() => String(getStoredUser()?.role || '').trim().toUpperCase() === 'ADMIN')
+const isAdmin = computed(() => isAdminUser(getStoredUser()))
 let latestRequest = 0
 
 const loadHistory = async () => {

@@ -3,23 +3,22 @@
 
 > Documento **generado automáticamente** por la cátedra de Programación III (RepoSense + análisis de calidad + constancia). **No editar a mano**: se regenera en cada evaluación.
 > Rama evaluada: `main`. Análisis **heurístico** (regex + métricas): es una criba para orientar la revisión, **no una nota**.
-> Generado: 2026-11-14.
+> Generado: 2026-11-17.
 
 ## 1. Veredicto
 
 | Aspecto | Resultado |
 |---|---|
 | Tipo de proyecto | app |
-| Índice de calidad de servicios | **50/100** (mínimo 50) |
-| Criterios cumplidos | **12/15** |
+| Índice de calidad de servicios | **100/100** (mínimo 50) |
+| Criterios cumplidos | **14/15** |
 | Aprobado (semáforo) | **SI** |
-| Código (LOC) | 2,452 |
-| Archivos de código | 25 |
-| Tests (archivos) | 1 |
+| Código (LOC) | 2,240 |
+| Archivos de código | 44 |
+| Tests (archivos) | 6 |
 | Cobertura de líneas | no aplica (frontend sin herramienta de cobertura E2E) |
-| Capas detectadas | presentacion, vistas, servicios |
+| Capas detectadas | presentacion, vistas, servicios, estado |
 | Pushes directos a `main` (sin PR) | 2 |
-| Tope por duplicación | `DUP>=15%` → índice ≤ 50 |
 
 > **Pushes directos:** se detectaron **2** commit(s) a `main` que no pasaron por un Pull Request. El flujo esperado es **rama → PR → revisión → merge**; el PR se aprueba con el mensaje `Aprobado`. Evitá pushear directo a `main`: la ruleset lo bloquea y el commit directo queda auditado.
 
@@ -29,8 +28,8 @@
 
 | Autor | Commits | Código (LOC) | Tests (LOC) | Docs (LOC) | Días activos | % del código |
 |---|---:|---:|---:|---:|---:|---:|
-| juanmasecchi | 20 | 2,461 | 0 | 5 | 9 | 58% |
-| Juan Ignacio Cruzado | 15 | 1,751 | 69 | 54 | 5 | 42% |
+| juanmasecchi | 20 | 1,516 | 0 | 5 | 9 | 52% |
+| Juan Ignacio Cruzado | 15 | 1,374 | 69 | 54 | 6 | 48% |
 | Juan Martín Rodríguez Secchi | 0 | 0 | 0 | 0 | 0 | 0% |
 
 > _El LOC de autoría lo calcula RepoSense sobre el historial y puede diferir del LOC de código del análisis de calidad (que mira solo el estado de `main`)._
@@ -42,8 +41,8 @@
 | Alumno | Sesiones | Cumplimiento | Pausa | Recencia | IC | Nivel | Para subir de nivel |
 |---|--:|--:|--:|--:|--:|--|--|
 | juanmasecchi | 5 | 19% | 28 d | 0% | **12** | No aprueba | Cumplimiento 19% (mín. 50%); Recencia 0% (mín. 50%) |
-| Juan Ignacio Cruzado | 11 | 42% | 23 d | 0% | **27** | No aprueba | Cumplimiento 42% (mín. 50%); Recencia 0% (mín. 50%) |
-| Juan Martín Rodríguez Secchi | 1 | 4% | 0 d | 50% | **30** | Muestra insuficiente | ≥3 sesiones y ≥2 semanas de período |
+| Juan Ignacio Cruzado | 11 | 41% | 23 d | 0% | **26** | No aprueba | Cumplimiento 41% (mín. 50%); Recencia 0% (mín. 50%) |
+| Juan Martín Rodríguez Secchi | 1 | 4% | 0 d | 29% | **27** | Muestra insuficiente | ≥3 sesiones y ≥2 semanas de período |
 
 > Para aprobar el IC: **2 sesiones por semana** sostenidas, sin pausas mayores a **10 días** y con actividad en las **últimas 2 semanas**. Se excluyen merges, bots y al docente. Zona horaria UTC-3.
 
@@ -55,17 +54,13 @@ Cada aspecto indica **qué mide**, **por qué importa** y **tu resultado**. Cuan
 
 - **Qué mide:** Un resumen numérico (0-100) que combina todas las señales y métricas del análisis, con topes duros por duplicación.
 - **Por qué importa:** Ordena y prioriza la revisión: un índice bajo indica varias señales que conviene mirar juntas.
-- **Tu resultado:** índice **50/100** _(mínimo 50)_
+- **Tu resultado:** índice **100/100** _(mínimo 50)_
 
-### 2. Duplicación (DRY) (duplicacion) — A REVISAR
+### 2. Duplicación (DRY) (duplicacion) — OK
 
 - **Qué mide:** Porcentaje de bloques de código repetidos (similitud) en el repositorio.
 - **Por qué importa:** Cada copia se mantiene por separado: un arreglo hay que repetirlo y los defectos se multiplican.
-- **Tu resultado:** **23.0%** de duplicación _(máximo 15%)_
-- **Para investigar la causa:**
-    - ¿El trabajo se repartió por pantallas o archivos y se integró copiando y pegando bloques?
-    - ¿Qué zonas del sistema cambiaron juntas más de una vez (señal de lógica compartida)?
-    - ¿Hubo un lugar común acordado para la lógica repetida antes de empezar, o cada integrante resolvió lo suyo?
+- **Tu resultado:** **1.5%** de duplicación _(máximo 15%)_
 
 ### 3. Secretos hardcodeados (SEC) — OK
 
@@ -83,7 +78,7 @@ Cada aspecto indica **qué mide**, **por qué importa** y **tu resultado**. Cuan
 
 - **Qué mide:** Si el código está separado en capas reconocibles (backend: presentación / lógica / datos; frontend: vistas / servicios / estado).
 - **Por qué importa:** Sin separación, cada archivo hace de todo y cualquier cambio toca varios lugares a la vez.
-- **Tu resultado:** **3** capa(s) detectada(s): presentacion, vistas, servicios _(mínimo 2 capas (a partir de 150 LOC))_
+- **Tu resultado:** **4** capa(s) detectada(s): presentacion, vistas, servicios, estado _(mínimo 2 capas (a partir de 150 LOC))_
 
 ### 6. Acceso a datos dentro del componente (HTTP) — OK
 
@@ -103,15 +98,11 @@ Cada aspecto indica **qué mide**, **por qué importa** y **tu resultado**. Cuan
 - **Por qué importa:** Se pierde la ayuda del compilador justo donde los datos vienen de afuera (API, formularios).
 - **Tu resultado:** **0** uso(s) de `any` _(máximo 2)_
 
-### 9. Componente demasiado grande (BigC) — A REVISAR
+### 9. Componente demasiado grande (BigC) — OK
 
 - **Qué mide:** Componentes de UI muy extensos, que suelen mezclar render, estado y lógica.
 - **Por qué importa:** Son difíciles de leer, probar y reutilizar, y sus cambios tienen efectos inesperados.
-- **Tu resultado:** **4** componente(s) demasiado grande(s) _(máximo 1)_
-- **Para investigar la causa:**
-    - ¿El componente creció a medida que se agregaban requisitos, sin volver a dividirlo?
-    - ¿Mezcla responsabilidades distintas (mostrar, calcular, pedir datos)?
-    - ¿Se dividió por pantalla o por unidad de responsabilidad?
+- **Tu resultado:** **0** componente(s) demasiado grande(s) _(máximo 1)_
 
 ### 10. Baja cohesión (Coh) — OK
 
@@ -123,7 +114,7 @@ Cada aspecto indica **qué mide**, **por qué importa** y **tu resultado**. Cuan
 
 - **Qué mide:** Complejidad ciclomática: cantidad de caminos posibles dentro de una función (condicionales, bucles, casos).
 - **Por qué importa:** Muchos caminos = difícil de seguir y de probar; suelen esconderse casos sin cubrir.
-- **Tu resultado:** **0** bloque(s) de complejidad alta _(máximo 5 por 1000 LOC (tenés 2452 LOC))_
+- **Tu resultado:** **0** bloque(s) de complejidad alta _(máximo 5 por 1000 LOC (tenés 2240 LOC))_
 
 ### 12. Funciones/métodos largos o con muchos parámetros (Tam) — OK
 
@@ -151,7 +142,7 @@ Cada aspecto indica **qué mide**, **por qué importa** y **tu resultado**. Cuan
 
 - **Qué mide:** Cantidad de vistas/componentes de pantalla del frontend.
 - **Por qué importa:** El frontend se mide por pantallas: pocas vistas sugiere poca cobertura de la interfaz pedida.
-- **Tu resultado:** **18** vista(s)/componente(s) _(mínimo 6)_
+- **Tu resultado:** **26** vista(s)/componente(s) _(mínimo 6)_
 
 ## 5. Observaciones y qué falta
 
@@ -159,11 +150,7 @@ Cada aspecto indica **qué mide**, **por qué importa** y **tu resultado**. Cuan
 
 | Criterio | Resultado actual | Meta | Brecha | Cómo alcanzarlo |
 |---|---|---|---|---|
-| Duplicación (DRY) (duplicacion) | **23.0%** de duplicación | máximo 15% | sobran 8.0 pts | Ubicá los bloques repetidos con `jscpd` o SonarQube, llevá la lógica común a una función o módulo compartido y hacé que todos lo usen. Cada copia eliminada baja el porcentaje; meta ≤15%. |
-| Componente demasiado grande (BigC) | **4** componente(s) demasiado grande(s) | máximo 1 | 3 componente(s) de más | Dividí el componente por responsabilidad en subcomponentes (render, estado, acceso a datos) y dejá el original sólo como orquestador. Meta: ≤1 componente grande. |
 | Endpoints del backend (EP) | **0** endpoint(s) | mínimo 5 | faltan 5 endpoint(s) | Implementá y exponé las operaciones del contrato que faltan (CRUD y consultas del enunciado) hasta llegar a 5 endpoints. |
-
-> **Tests (informativo):** hoy tenés **1** archivo(s) de test; la meta es **5**, pero **no** es una compuerta del semáforo. Para acercarte, agregá tests de los flujos principales (servicios y endpoints) y corré la suite con coverage.
 
 ## 6. Actividad en clase y fuera de clase
 
@@ -203,7 +190,11 @@ Cada aspecto indica **qué mide**, **por qué importa** y **tu resultado**. Cuan
 | 2026-11-11 | No | sin actividad | 0 / 0 |
 | 2026-11-13 | No | sin actividad | 0 / 0 |
 
-**Fuera de clase:** sin actividad registrada.
+**Fuera de clase:** 1 fecha(s) con actividad · 0 commits · 5 merges
+
+| Fecha | Repositorios | Commits / merges |
+|---|---|--:|
+| 2026-11-16 | B-Profesional, F-profesional | 0 / 5 |
 
 ### Juan Martín Rodríguez Secchi
 
@@ -243,7 +234,7 @@ Cada aspecto indica **qué mide**, **por qué importa** y **tu resultado**. Cuan
 
 ### juanmasecchi
 
-**12/27 clases con actividad** · total del período: 27 commits · 41 merges
+**11/27 clases con actividad** · total del período: 27 commits · 40 merges
 
 | Fecha | Actividad | Repositorios | Commits / merges |
 |---|:--:|---|--:|
@@ -273,19 +264,13 @@ Cada aspecto indica **qué mide**, **por qué importa** y **tu resultado**. Cuan
 | 2026-11-04 | No | sin actividad | 0 / 0 |
 | 2026-11-06 | No | sin actividad | 0 / 0 |
 | 2026-11-11 | **Sí** | B-Profesional, F-profesional | 0 / 2 |
-| 2026-11-13 | **Sí** | B-Profesional | 0 / 1 |
+| 2026-11-13 | No | sin actividad | 0 / 0 |
 
 **Fuera de clase:** sin actividad registrada.
 
 ## 7. Anexo: dónde mirar
 
 Archivos donde el análisis encontró cada señal en rojo (sin número de línea, a propósito):
-
-**Componente demasiado grande (BigC)** — 4 archivo(s):
-- `src/views/PetCreateView.vue`
-- `src/views/PetDetailView.vue`
-- `src/views/PetEditView.vue`
-- `src/views/SolicitudesView.vue`
 
 ---
 _Informe generado por la cátedra. Los umbrales corresponden al perfil `exigente`. Ante dudas, revisá el archivo señalado y el criterio en `CRITERIOS-CALIDAD.md`._

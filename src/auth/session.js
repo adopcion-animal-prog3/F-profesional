@@ -50,9 +50,9 @@ export const saveSession = (token, user) => {
   if (user && typeof user === 'object') {
     const publicUser = {
       id: user.id,
-      name: user.name,
+      nombre: user.nombre ?? user.name ?? '',
       email: user.email,
-      role: user.role || null
+      rol: user.rol ?? user.role ?? null
     }
 
     storage.setItem(USER_KEY, JSON.stringify(publicUser))

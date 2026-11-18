@@ -3,12 +3,12 @@
     <div class="section-header">
       <div>
         <p class="eyebrow">Adopciones</p>
-        <h1>Mascotas disponibles</h1>
+        <h1>Todas las mascotas</h1>
+        <p class="section-hint">Tocá “Ver detalle” para editar una publicación o cargar su historial clínico.</p>
       </div>
 
       <div class="header-actions">
-        <router-link class="primary-button small-button" to="/mascotas/nueva">Nueva mascota</router-link>
-        <button class="primary-button small-button" type="button" @click="load" :disabled="isLoading">
+        <button class="secondary-button small-button" type="button" @click="load" :disabled="isLoading">
           {{ isLoading ? (hasLoadedSuccessfully ? 'Actualizando...' : 'Cargando...') : 'Actualizar' }}
         </button>
       </div>
@@ -22,18 +22,14 @@
       resource-name="mascotas"
       error-title="No se pudo cargar la lista"
       refresh-error-prefix="No se pudo actualizar la lista"
-      empty-title="No hay mascotas disponibles"
-      empty-text="En este momento no registramos animales en adopción."
+      empty-title="Todavía no hay mascotas publicadas"
+      empty-text="Usá el botón “Publicar mascota” para cargar la primera."
       @retry="load"
     />
 
     <div v-if="pets.length > 0" class="pets-grid">
       <PetCard v-for="pet in pets" :key="pet.id" :pet="pet" />
     </div>
-
-    <p v-if="source === 'demo'" class="demo-banner">
-      Modo demostración: la API no respondió y se muestran mascotas de ejemplo.
-    </p>
   </section>
 </template>
 
@@ -50,7 +46,6 @@ const {
   isLoading,
   hasLoadedSuccessfully,
   errorMessage,
-  source,
   load
 } = useResourceList(apiGetPets, {
   normalize: (pet, index) => normalizePet(pet, index + 1),

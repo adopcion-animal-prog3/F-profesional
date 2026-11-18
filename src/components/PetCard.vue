@@ -13,7 +13,6 @@
         <li><strong>Raza:</strong> {{ pet.breed }}</li>
         <li><strong>Edad:</strong> {{ pet.age }}</li>
         <li><strong>Sexo:</strong> {{ pet.gender }}</li>
-        <li><strong>Ubicación:</strong> {{ pet.location }}</li>
       </ul>
 
       <p class="pet-description">{{ pet.description }}</p>

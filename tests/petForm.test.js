@@ -8,36 +8,39 @@ import {
   validatePetForm
 } from '../src/utils/petForm.js'
 
+const IMAGEN = 'data:image/jpeg;base64,/9j/4AAQ'
+
 const validForm = {
-  name: 'Luna',
-  species: 'Perro',
-  breed: 'Mestizo',
-  age: '2',
-  gender: 'Hembra',
-  status: 'Disponible',
-  location: 'Córdoba',
-  description: 'Muy sociable con otros perros.'
+  nombre: 'Luna',
+  especie: 'Perro',
+  raza: 'Mestizo',
+  edad: '2',
+  sexo: 'F',
+  descripcion: 'Muy sociable con otros perros.',
+  adoptada: false,
+  imagen: IMAGEN
 }
 
 test('un formulario completo no tiene errores', () => {
   assert.deepEqual(validatePetForm(validForm), {})
 })
 
-test('el formulario vacío marca todos los campos obligatorios', () => {
-  const errors = validatePetForm({ ...createEmptyPetForm(), status: '' })
+test('solo nombre y especie son obligatorios, como en el contrato de la API', () => {
+  const errors = validatePetForm(createEmptyPetForm())
 
-  assert.deepEqual(Object.keys(errors).sort(), [
-    'age', 'breed', 'description', 'gender', 'location', 'name', 'species', 'status'
-  ])
-  assert.equal(errors.name, 'El nombre es obligatorio.')
+  assert.deepEqual(Object.keys(errors).sort(), ['especie', 'nombre'])
+  assert.equal(errors.nombre, 'El nombre es obligatorio.')
+  assert.deepEqual(validatePetForm({ ...createEmptyPetForm(), nombre: 'Toby', especie: 'Gato' }), {})
 })
 
-test('valida longitudes mínimas y edad positiva', () => {
-  const errors = validatePetForm({ ...validForm, name: 'L', age: '0', description: 'corta' })
+test('valida longitudes máximas y edad entera no negativa', () => {
+  const errors = validatePetForm({ ...validForm, nombre: 'L'.repeat(151), raza: 'r'.repeat(121), edad: '-1' })
 
-  assert.equal(errors.name, 'El nombre debe tener al menos 2 caracteres.')
-  assert.equal(errors.age, 'La edad debe ser mayor que 0.')
-  assert.equal(errors.description, 'La descripción debe tener al menos 10 caracteres.')
+  assert.match(errors.nombre, /150/)
+  assert.match(errors.raza, /120/)
+  assert.match(errors.edad, /mayor o igual a 0/)
+  assert.equal(validatePetForm({ ...validForm, edad: '0' }).edad, undefined)
+  assert.match(validatePetForm({ ...validForm, edad: '1.5' }).edad, /entero/)
 })
 
 test('parseAge extrae el número de textos como "2 años"', () => {
@@ -46,19 +49,31 @@ test('parseAge extrae el número de textos como "2 años"', () => {
   assert.equal(parseAge(null), '')
 })
 
-test('mapPetToForm completa valores faltantes', () => {
-  const form = mapPetToForm({ name: 'Milo', age: '1 año' })
+test('mapPetToForm convierte la respuesta de la API en el formulario', () => {
+  const form = mapPetToForm({ nombre: 'Milo', especie: 'Gato', edad: 1, sexo: 'M', adoptada: true, imagen: IMAGEN })
 
-  assert.equal(form.name, 'Milo')
-  assert.equal(form.age, '1')
-  assert.equal(form.status, 'Disponible')
-  assert.equal(form.location, '')
+  assert.equal(form.nombre, 'Milo')
+  assert.equal(form.edad, '1')
+  assert.equal(form.sexo, 'M')
+  assert.equal(form.adoptada, true)
+  assert.equal(form.imagen, IMAGEN)
+  assert.equal(mapPetToForm({ name: 'Demo', sexo: 'Macho' }).sexo, '')
 })
 
-test('buildPetPayload limpia espacios y convierte la edad', () => {
-  const payload = buildPetPayload({ ...validForm, name: '  Luna ', age: '2', status: ' ' })
+test('buildPetPayload envía los campos del contrato con nulos para lo opcional', () => {
+  const payload = buildPetPayload({ ...createEmptyPetForm(), nombre: '  Luna ', especie: ' Perro ' })
 
-  assert.equal(payload.name, 'Luna')
-  assert.equal(payload.age, 2)
-  assert.equal(payload.status, 'Disponible')
+  assert.deepEqual(payload, {
+    nombre: 'Luna',
+    especie: 'Perro',
+    raza: null,
+    edad: null,
+    sexo: null,
+    descripcion: null,
+    adoptada: false,
+    imagen: null
+  })
+  assert.equal(buildPetPayload(validForm).edad, 2)
+  assert.equal(buildPetPayload(validForm).imagen, IMAGEN)
+  assert.equal('status' in payload || 'location' in payload, false)
 })

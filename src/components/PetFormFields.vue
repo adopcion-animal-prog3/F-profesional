@@ -1,16 +1,18 @@
 <template>
   <div class="form-grid">
+    <PetImageField v-model="form.imagen" />
+
     <div
       v-for="field in fields"
       :key="field.key"
       class="field-group"
       :class="{ 'field-full': field.full }"
     >
-      <label :for="`pet-${field.id}`">{{ field.label }}</label>
+      <label :for="`pet-${field.key}`">{{ field.label }}</label>
 
       <select
         v-if="field.options"
-        :id="`pet-${field.id}`"
+        :id="`pet-${field.key}`"
         v-model="form[field.key]"
         :class="{ invalid: errors[field.key] }"
       >
@@ -21,16 +23,15 @@
 
       <textarea
         v-else-if="field.type === 'textarea'"
-        :id="`pet-${field.id}`"
+        :id="`pet-${field.key}`"
         v-model="form[field.key]"
         rows="5"
-        :class="{ invalid: errors[field.key] }"
         :placeholder="field.placeholder"
       ></textarea>
 
       <input
         v-else
-        :id="`pet-${field.id}`"
+        :id="`pet-${field.key}`"
         v-model="form[field.key]"
         :type="field.type || 'text'"
         v-bind="field.attrs"
@@ -40,11 +41,17 @@
 
       <small v-if="errors[field.key]" class="field-error">{{ errors[field.key] }}</small>
     </div>
+
+    <label class="field-group field-checkbox" for="pet-adoptada">
+      <input id="pet-adoptada" v-model="form.adoptada" type="checkbox" />
+      <span>Ya fue adoptada</span>
+    </label>
   </div>
 </template>
 
 <script setup>
-import { PET_GENDER_OPTIONS, PET_STATUS_OPTIONS } from '../utils/petForm'
+import PetImageField from './PetImageField.vue'
+import { PET_SEXO_OPTIONS } from '../utils/petForm'
 
 defineProps({
   form: { type: Object, required: true },
@@ -52,27 +59,17 @@ defineProps({
 })
 
 const fields = [
-  { key: 'name', id: 'name', label: 'Nombre', placeholder: 'Ej: Luna' },
-  { key: 'species', id: 'species', label: 'Especie', placeholder: 'Ej: Perro' },
-  { key: 'breed', id: 'breed', label: 'Raza', placeholder: 'Ej: Mestizo' },
+  { key: 'nombre', label: 'Nombre *', placeholder: 'Ej: Luna' },
+  { key: 'especie', label: 'Especie *', placeholder: 'Ej: Perro' },
+  { key: 'raza', label: 'Raza', placeholder: 'Ej: Mestizo' },
+  { key: 'edad', label: 'Edad (años)', type: 'number', placeholder: 'Ej: 2', attrs: { min: 0, step: 1 } },
+  { key: 'sexo', label: 'Sexo', options: PET_SEXO_OPTIONS },
   {
-    key: 'age',
-    id: 'age',
-    label: 'Edad',
-    type: 'number',
-    placeholder: 'Ej: 2',
-    attrs: { min: 0, step: 0.5 }
-  },
-  { key: 'gender', id: 'gender', label: 'Sexo', options: PET_GENDER_OPTIONS },
-  { key: 'status', id: 'status', label: 'Estado', options: PET_STATUS_OPTIONS },
-  { key: 'location', id: 'location', label: 'Ubicación', placeholder: 'Ej: Córdoba', full: true },
-  {
-    key: 'description',
-    id: 'description',
+    key: 'descripcion',
     label: 'Descripción',
     type: 'textarea',
     full: true,
-    placeholder: 'Describe la personalidad, estado de salud y necesidades de la mascota.'
+    placeholder: 'Describí la personalidad, estado de salud y necesidades de la mascota.'
   }
 ]
 </script>

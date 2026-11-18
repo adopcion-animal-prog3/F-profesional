@@ -1,4 +1,15 @@
 const DEFAULT_DESCRIPTION = 'Mascota en adopción con seguimiento veterinario.'
+const SEXO_LABELS = { M: 'Macho', F: 'Hembra', OTRO: 'Otro' }
+
+const adoptionStatus = (item) => {
+  if (item.status ?? item.estado) return item.status ?? item.estado
+  return item.adoptada ? 'Adoptado' : 'Disponible'
+}
+
+const genderLabel = (item) => {
+  const value = item.gender ?? item.sexo
+  return SEXO_LABELS[value] ?? value ?? 'No informado'
+}
 
 export const normalizePet = (item, fallbackId) => ({
   id: item.id ?? item._id ?? fallbackId,
@@ -6,11 +17,17 @@ export const normalizePet = (item, fallbackId) => ({
   species: item.species ?? item.especie ?? item.type ?? 'No especificada',
   breed: item.breed ?? item.raza ?? 'Sin raza',
   age: item.age ?? item.edad ?? 'Edad no informada',
-  gender: item.gender ?? item.sexo ?? 'No informado',
-  status: item.status ?? item.estado ?? 'Disponible',
-  location: item.location ?? item.ubicacion ?? item.city ?? item.ciudad ?? 'Sin ubicación',
-  description: item.description ?? item.descripcion ?? DEFAULT_DESCRIPTION
+  gender: genderLabel(item),
+  status: adoptionStatus(item),
+  adoptada: Boolean(item.adoptada) || adoptionStatus(item) === 'Adoptado',
+  description: item.description ?? item.descripcion ?? DEFAULT_DESCRIPTION,
+  imagen: item.imagen ?? null,
+  creadoPor: item.creado_por ?? null
 })
+
+// Una cuenta profesional gestiona sus publicaciones (o las que no tienen publicador).
+export const canManagePet = (pet, user) =>
+  Boolean(user) && (pet?.creadoPor == null || String(pet.creadoPor) === String(user.id))
 
 export const getPetInitials = (name = '') =>
   String(name)

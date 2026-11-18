@@ -16,6 +16,7 @@ export const validateRegisterForm = ({ name = '', email = '', password = '', con
     [!email.trim(), 'El email es obligatorio.'],
     [!isValidEmail(email), 'Introduce un email válido.'],
     [!password, 'La contraseña es obligatoria.'],
+    [password.length < 8, 'La contraseña debe tener al menos 8 caracteres.'],
     [!confirmPassword, 'Debes confirmar la contraseña.'],
     [password !== confirmPassword, 'Las contraseñas no coinciden.']
   ])

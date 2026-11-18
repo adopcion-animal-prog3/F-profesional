@@ -1,5 +1,6 @@
 <template>
-  <div :class="[baseClass, getPetTone(pet)]">
+  <img v-if="pet?.imagen" :class="[baseClass, 'pet-photo']" :src="pet.imagen" :alt="`Foto de ${pet.name}`" loading="lazy" />
+  <div v-else :class="[baseClass, getPetTone(pet)]">
     <span>{{ getPetInitials(pet?.name) }}</span>
   </div>
 </template>

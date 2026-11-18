@@ -21,7 +21,7 @@ export function usePetForm() {
 
     submitMessage.value = ''
     const saved = await run({
-      operation: () => save({ ...form, age: Number(form.age) }),
+      operation: () => save({ ...form }),
       successMessage,
       fallbackError
     })

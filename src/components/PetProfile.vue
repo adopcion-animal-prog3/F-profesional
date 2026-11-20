@@ -36,7 +36,6 @@ const details = [
   { key: 'species', label: 'Especie' },
   { key: 'breed', label: 'Raza' },
   { key: 'age', label: 'Edad' },
-  { key: 'gender', label: 'Sexo' },
-  { key: 'location', label: 'Ubicación', wide: true }
+  { key: 'gender', label: 'Sexo' }
 ]
 </script>

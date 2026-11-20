@@ -22,12 +22,15 @@
   </p>
 
   <div v-if="hasLoaded && isEmpty" class="state-block empty-state">
+    <EmptyIllustration />
     <component :is="headingTag">{{ emptyTitle }}</component>
     <p>{{ emptyText }}</p>
   </div>
 </template>
 
 <script setup>
+import EmptyIllustration from './brand/EmptyIllustration.vue'
+
 defineProps({
   isLoading: { type: Boolean, default: false },
   hasLoaded: { type: Boolean, default: false },

@@ -20,18 +20,13 @@
 
         <div class="nav-links detail-actions">
           <router-link to="/mascotas">Volver al listado</router-link>
-          <router-link :to="{ name: 'mascota-editar', params: { id: pet.id } }">Editar mascota</router-link>
-          <router-link
-            :to="{ name: 'solicitud-adopcion', params: { id: pet.id } }"
-            :state="{ pet }"
-            class="primary-button small-button"
-          >
-            Solicitar adopción
-          </router-link>
-          <button class="danger-button" type="button" :disabled="isDeleting" @click="handleDelete">
-            {{ isDeleting ? 'Eliminando...' : 'Eliminar mascota' }}
-          </button>
-          <router-link to="/dashboard">Ir al dashboard</router-link>
+          <template v-if="isOwner">
+            <router-link :to="{ name: 'mascota-editar', params: { id: pet.id } }">Editar mascota</router-link>
+            <button class="danger-button" type="button" :disabled="isDeleting" @click="handleDelete">
+              {{ isDeleting ? 'Eliminando...' : 'Eliminar mascota' }}
+            </button>
+          </template>
+          <p v-else class="detail-note">Publicada por otra cuenta: solo su publicador puede editarla.</p>
         </div>
 
         <p v-if="deleteError" class="error-message" role="alert">
@@ -43,25 +38,26 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { apiDeletePetById } from '../api/http'
+import { getStoredUser } from '../auth/session'
 import PetAvatar from '../components/PetAvatar.vue'
 import PetClinicalHistory from '../components/PetClinicalHistory.vue'
 import PetLoadState from '../components/PetLoadState.vue'
 import PetProfile from '../components/PetProfile.vue'
 import { useAsyncAction } from '../composables/useAsyncAction'
 import { usePetById } from '../composables/usePetById'
-import { normalizePet } from '../utils/petDisplay'
+import { canManagePet, normalizePet } from '../utils/petDisplay'
 
 const route = useRoute()
 const router = useRouter()
 const pet = ref(null)
+const isOwner = computed(() => canManagePet(pet.value, getStoredUser()))
 
 const { isLoading, notFound, errorMessage } = usePetById(() => route.params.id, {
   onLoaded: (data) => {
     pet.value = normalizePet(data, route.params.id)
-    localStorage.setItem('selected_pet', JSON.stringify(pet.value))
   },
   fallbackError: 'No se pudo cargar la mascota solicitada.'
 })

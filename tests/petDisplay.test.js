@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { getPetInitials, getPetTone, getStatusClass, normalizePet } from '../src/utils/petDisplay.js'
+import { canManagePet, getPetInitials, getPetTone, getStatusClass, normalizePet } from '../src/utils/petDisplay.js'
 
 test('normalizePet acepta campos en español y en inglés', () => {
   const pet = normalizePet({ id: 4, nombre: 'Tom', especie: 'Gato', edad: 3 }, 99)
@@ -31,4 +31,22 @@ test('getPetTone elige el color según la especie', () => {
 test('getStatusClass convierte el estado en una clase CSS', () => {
   assert.equal(getStatusClass(' En tratamiento '), 'en-tratamiento')
   assert.equal(getStatusClass(), '')
+})
+
+test('normalizePet traduce sexo, estado de adopción, imagen y publicador', () => {
+  const pet = normalizePet({ id: 1, nombre: 'Mia', sexo: 'F', adoptada: true, imagen: 'data:image/png;base64,AA==', creado_por: 5 })
+
+  assert.equal(pet.gender, 'Hembra')
+  assert.equal(pet.status, 'Adoptado')
+  assert.equal(pet.adoptada, true)
+  assert.equal(pet.imagen, 'data:image/png;base64,AA==')
+  assert.equal(pet.creadoPor, 5)
+  assert.equal(normalizePet({ adoptada: false }).status, 'Disponible')
+})
+
+test('canManagePet permite gestionar solo publicaciones propias o sin publicador', () => {
+  assert.equal(canManagePet({ creadoPor: 5 }, { id: 5 }), true)
+  assert.equal(canManagePet({ creadoPor: 5 }, { id: '6' }), false)
+  assert.equal(canManagePet({ creadoPor: null }, { id: 6 }), true)
+  assert.equal(canManagePet({ creadoPor: 5 }, null), false)
 })

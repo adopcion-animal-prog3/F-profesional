@@ -27,6 +27,14 @@
       {{ solicitud.mensaje }}
     </p>
 
+    <router-link
+      v-if="solicitud.usuarioId"
+      class="secondary-button small-button"
+      :to="{ name: 'conversacion', params: { usuarioId: solicitud.usuarioId }, query: { mascotaId: solicitud.mascotaId } }"
+    >
+      Enviar mensaje al adoptante
+    </router-link>
+
     <div v-if="isAdmin" class="solicitud-admin">
       <label :for="`estado-${solicitud.id}`">Cambiar estado</label>
       <div class="solicitud-admin-controls">

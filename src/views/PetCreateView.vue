@@ -2,8 +2,9 @@
   <section class="pet-form-view">
     <div class="section-header">
       <div>
-        <p class="eyebrow">Administración</p>
-        <h1>Registrar mascota</h1>
+        <p class="eyebrow">Nueva publicación</p>
+        <h2>Completá los datos de la mascota</h2>
+        <p class="section-hint">Los campos con * son obligatorios. Una buena foto ayuda a que la adopten más rápido.</p>
       </div>
       <router-link class="primary-button small-button" to="/mascotas">Volver al listado</router-link>
     </div>

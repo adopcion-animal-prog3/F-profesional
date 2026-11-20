@@ -1,52 +1,42 @@
+// Formulario de mascota alineado con el contrato de la API (campos en español).
 export const createEmptyPetForm = () => ({
-  name: '',
-  species: '',
-  breed: '',
-  age: '',
-  gender: '',
-  status: 'Disponible',
-  location: '',
-  description: ''
+  nombre: '',
+  especie: '',
+  raza: '',
+  edad: '',
+  sexo: '',
+  descripcion: '',
+  adoptada: false,
+  imagen: null
 })
 
-export const PET_GENDER_OPTIONS = [
-  { value: '', label: 'Seleccionar' },
-  { value: 'Macho', label: 'Macho' },
-  { value: 'Hembra', label: 'Hembra' },
-  { value: 'No informado', label: 'No informado' }
+export const PET_SEXO_OPTIONS = [
+  { value: '', label: 'No informado' },
+  { value: 'M', label: 'Macho' },
+  { value: 'F', label: 'Hembra' },
+  { value: 'OTRO', label: 'Otro' }
 ]
 
-export const PET_STATUS_OPTIONS = ['Disponible', 'En tratamiento', 'Adoptado']
-  .map((value) => ({ value, label: value }))
+const MAX_LENGTHS = { nombre: 150, especie: 100, raza: 120 }
 
-const requiredText = (value, message) => (String(value ?? '').trim() ? '' : message)
-
-const minLengthText = (value, min, emptyMessage, shortMessage) => {
+const textError = (value, field, label, required) => {
   const text = String(value ?? '').trim()
-  if (!text) return emptyMessage
-  return text.length < min ? shortMessage : ''
+  if (!text) return required ? `${label} es obligatorio.` : ''
+  return text.length > MAX_LENGTHS[field] ? `${label} no puede superar ${MAX_LENGTHS[field]} caracteres.` : ''
 }
 
-const validateAge = (age) => {
-  if (!age && age !== 0) return 'La edad es obligatoria.'
-  return Number(age) <= 0 ? 'La edad debe ser mayor que 0.' : ''
+const validateEdad = (edad) => {
+  if (edad === '' || edad === null || edad === undefined) return ''
+  const value = Number(edad)
+  return Number.isInteger(value) && value >= 0 ? '' : 'La edad debe ser un número entero mayor o igual a 0.'
 }
 
 export const validatePetForm = (form) => {
   const errors = {
-    name: minLengthText(form.name, 2, 'El nombre es obligatorio.', 'El nombre debe tener al menos 2 caracteres.'),
-    species: requiredText(form.species, 'La especie es obligatoria.'),
-    breed: requiredText(form.breed, 'La raza es obligatoria.'),
-    age: validateAge(form.age),
-    gender: form.gender ? '' : 'Debe seleccionar el sexo.',
-    status: form.status ? '' : 'Debe seleccionar el estado.',
-    location: requiredText(form.location, 'La ubicación es obligatoria.'),
-    description: minLengthText(
-      form.description,
-      10,
-      'La descripción es obligatoria.',
-      'La descripción debe tener al menos 10 caracteres.'
-    )
+    nombre: textError(form.nombre, 'nombre', 'El nombre', true),
+    especie: textError(form.especie, 'especie', 'La especie', true),
+    raza: textError(form.raza, 'raza', 'La raza', false),
+    edad: validateEdad(form.edad)
   }
 
   return Object.fromEntries(Object.entries(errors).filter(([, message]) => message))
@@ -55,27 +45,31 @@ export const validatePetForm = (form) => {
 export const parseAge = (value) => {
   if (value === null || value === undefined || value === '') return ''
   if (typeof value === 'number') return String(value)
-  return String(value).replace(/[^\d.]/g, '')
+  return String(value).replace(/[^\d]/g, '')
 }
 
+const SEXO_VALUES = ['M', 'F', 'OTRO']
+
 export const mapPetToForm = (pet) => ({
-  name: pet.name ?? '',
-  species: pet.species ?? '',
-  breed: pet.breed ?? '',
-  age: parseAge(pet.age),
-  gender: pet.gender ?? '',
-  status: pet.status ?? 'Disponible',
-  location: pet.location ?? '',
-  description: pet.description ?? ''
+  nombre: pet.nombre ?? pet.name ?? '',
+  especie: pet.especie ?? pet.species ?? '',
+  raza: pet.raza ?? pet.breed ?? '',
+  edad: parseAge(pet.edad ?? pet.age),
+  sexo: SEXO_VALUES.includes(pet.sexo) ? pet.sexo : '',
+  descripcion: pet.descripcion ?? pet.description ?? '',
+  adoptada: Boolean(pet.adoptada),
+  imagen: pet.imagen ?? null
 })
 
+const optionalText = (value) => String(value ?? '').trim() || null
+
 export const buildPetPayload = (petData) => ({
-  name: petData.name?.trim(),
-  species: petData.species?.trim(),
-  breed: petData.breed?.trim(),
-  age: Number(petData.age),
-  gender: petData.gender?.trim(),
-  status: petData.status?.trim() || 'Disponible',
-  location: petData.location?.trim(),
-  description: petData.description?.trim()
+  nombre: String(petData.nombre ?? '').trim(),
+  especie: String(petData.especie ?? '').trim(),
+  raza: optionalText(petData.raza),
+  edad: petData.edad === '' || petData.edad == null ? null : Number(petData.edad),
+  sexo: SEXO_VALUES.includes(petData.sexo) ? petData.sexo : null,
+  descripcion: optionalText(petData.descripcion),
+  adoptada: Boolean(petData.adoptada),
+  imagen: petData.imagen || null
 })

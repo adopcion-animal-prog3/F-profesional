@@ -20,6 +20,8 @@ const STATUS_KINDS = [
   [(status) => status === 401, 'unauthorized'],
   [(status) => status === 403, 'forbidden'],
   [(status) => status === 404, 'notFound'],
+  [(status) => status === 409, 'conflict'],
+  [(status) => status === 429, 'tooMany'],
   [(status) => status >= 500, 'server']
 ]
 

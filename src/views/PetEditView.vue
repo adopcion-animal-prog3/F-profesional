@@ -14,8 +14,8 @@
     <template v-else>
       <div class="section-header">
         <div>
-          <p class="eyebrow">Administración</p>
-          <h1>Editar mascota</h1>
+          <p class="eyebrow">Editar publicación</p>
+          <h2>Actualizá los datos de la mascota</h2>
         </div>
         <router-link class="primary-button small-button" :to="detailRoute">
           Volver al detalle

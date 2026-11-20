@@ -56,3 +56,20 @@ test('formatDateTime formatea fechas válidas y respeta los valores inválidos',
   assert.equal(formatDateTime('', 'No disponible'), 'No disponible')
   assert.equal(formatClinicalHistoryDate('texto'), 'texto')
 })
+
+test('normalizeSolicitud usa los nombres enriquecidos por la API profesional', () => {
+  const solicitud = normalizeSolicitud({
+    id: 9, usuario_id: 7, mascota_id: 3, estado: 'PENDIENTE',
+    mascota_nombre: 'Luna', usuario_nombre: 'Ana', created_at: '2026-01-01T00:00:00Z'
+  }, 0)
+
+  assert.equal(solicitud.mascotaName, 'Luna')
+  assert.equal(solicitud.adoptanteName, 'Ana')
+  assert.equal(solicitud.usuarioId, 7)
+  assert.equal(solicitud.mascotaId, 3)
+  assert.equal(solicitud.fechaCreacion, '2026-01-01T00:00:00Z')
+})
+
+test('isAdminUser también reconoce el campo rol de la API', () => {
+  assert.equal(isAdminUser({ rol: 'ADMIN' }), true)
+})

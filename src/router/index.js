@@ -8,7 +8,8 @@ import PetDetailView from '../views/PetDetailView.vue'
 import PetCreateView from '../views/PetCreateView.vue'
 import PetEditView from '../views/PetEditView.vue'
 import SolicitudesView from '../views/SolicitudesView.vue'
-import AdoptionRequestView from '../views/AdoptionRequestView.vue'
+import MessagesView from '../views/MessagesView.vue'
+import ConversationView from '../views/ConversationView.vue'
 import { isAuthenticated } from '../auth/session'
 
 const publicRoutes = ['login', 'registro']
@@ -63,10 +64,15 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/mascotas/:id/solicitar',
-    name: 'solicitud-adopcion',
-    component: AdoptionRequestView,
-    props: (route) => ({ pet: route.state?.pet }),
+    path: '/mensajes',
+    name: 'mensajes',
+    component: MessagesView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/mensajes/:usuarioId',
+    name: 'conversacion',
+    component: ConversationView,
     meta: { requiresAuth: true }
   },
   {
@@ -78,7 +84,8 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  // BASE_URL permite servir el portal bajo un subpath (por ejemplo /profesional/).
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes
 })
 

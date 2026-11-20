@@ -13,9 +13,9 @@
 | Índice de calidad de servicios | **100/100** (mínimo 50) |
 | Criterios cumplidos | **14/15** |
 | Aprobado (semáforo) | **SI** |
-| Código (LOC) | 2,240 |
-| Archivos de código | 44 |
-| Tests (archivos) | 6 |
+| Código (LOC) | 2,617 |
+| Archivos de código | 58 |
+| Tests (archivos) | 8 |
 | Cobertura de líneas | no aplica (frontend sin herramienta de cobertura E2E) |
 | Capas detectadas | presentacion, vistas, servicios, estado |
 | Pushes directos a `main` (sin PR) | 2 |
@@ -28,11 +28,13 @@
 
 | Autor | Commits | Código (LOC) | Tests (LOC) | Docs (LOC) | Días activos | % del código |
 |---|---:|---:|---:|---:|---:|---:|
-| juanmasecchi | 20 | 1,516 | 0 | 5 | 9 | 52% |
-| Juan Ignacio Cruzado | 15 | 1,374 | 69 | 54 | 6 | 48% |
+| Juan Ignacio Cruzado | 16 | 2,061 | 208 | 54 | 7 | 77% |
+| juanmasecchi | 20 | 620 | 0 | 5 | 9 | 23% |
 | Juan Martín Rodríguez Secchi | 0 | 0 | 0 | 0 | 0 | 0% |
 
 > _El LOC de autoría lo calcula RepoSense sobre el historial y puede diferir del LOC de código del análisis de calidad (que mira solo el estado de `main`)._
+
+> **Reparto del trabajo:** Juan Ignacio Cruzado concentra el 77% de las líneas de código. Un reparto muy desigual suele indicar que la integración no fue realmente en equipo; vale la pena reconstruir cómo se coordinó.
 
 ## 3. Constancia (IC) — todas las ramas
 
@@ -40,8 +42,8 @@
 
 | Alumno | Sesiones | Cumplimiento | Pausa | Recencia | IC | Nivel | Para subir de nivel |
 |---|--:|--:|--:|--:|--:|--|--|
-| juanmasecchi | 5 | 18% | 28 d | 0% | **11** | No aprueba | Cumplimiento 18% (mín. 50%); Recencia 0% (mín. 50%) |
 | Juan Ignacio Cruzado | 12 | 42% | 23 d | 86% | **40** | No aprueba | Cumplimiento 42% (mín. 50%) |
+| juanmasecchi | 5 | 18% | 28 d | 0% | **11** | No aprueba | Cumplimiento 18% (mín. 50%); Recencia 0% (mín. 50%) |
 | Juan Martín Rodríguez Secchi | 1 | 4% | 0 d | 0% | **23** | Muestra insuficiente | ≥3 sesiones y ≥2 semanas de período |
 
 > Para aprobar el IC: **2 sesiones por semana** sostenidas, sin pausas mayores a **10 días** y con actividad en las **últimas 2 semanas**. Se excluyen merges, bots y al docente. Zona horaria UTC-3.
@@ -60,7 +62,7 @@ Cada aspecto indica **qué mide**, **por qué importa** y **tu resultado**. Cuan
 
 - **Qué mide:** Porcentaje de bloques de código repetidos (similitud) en el repositorio.
 - **Por qué importa:** Cada copia se mantiene por separado: un arreglo hay que repetirlo y los defectos se multiplican.
-- **Tu resultado:** **1.5%** de duplicación _(máximo 15%)_
+- **Tu resultado:** **0.0%** de duplicación _(máximo 15%)_
 
 ### 3. Secretos hardcodeados (SEC) — OK
 
@@ -114,13 +116,13 @@ Cada aspecto indica **qué mide**, **por qué importa** y **tu resultado**. Cuan
 
 - **Qué mide:** Complejidad ciclomática: cantidad de caminos posibles dentro de una función (condicionales, bucles, casos).
 - **Por qué importa:** Muchos caminos = difícil de seguir y de probar; suelen esconderse casos sin cubrir.
-- **Tu resultado:** **0** bloque(s) de complejidad alta _(máximo 5 por 1000 LOC (tenés 2240 LOC))_
+- **Tu resultado:** **1** bloque(s) de complejidad alta _(máximo 5 por 1000 LOC (tenés 2617 LOC))_
 
 ### 12. Funciones/métodos largos o con muchos parámetros (Tam) — OK
 
 - **Qué mide:** Tamaño de las funciones/métodos y cantidad de parámetros.
 - **Por qué importa:** Una función que hace varias cosas cuesta leerla, nombrarla y reutilizarla.
-- **Tu resultado:** **0** función/método(s) largos o con muchos parámetros _(máximo 10 por 1000 LOC)_
+- **Tu resultado:** **2** función/método(s) largos o con muchos parámetros _(máximo 10 por 1000 LOC)_
 
 ### 13. Acoplamiento alto (Acop) — OK
 
@@ -142,7 +144,7 @@ Cada aspecto indica **qué mide**, **por qué importa** y **tu resultado**. Cuan
 
 - **Qué mide:** Cantidad de vistas/componentes de pantalla del frontend.
 - **Por qué importa:** El frontend se mide por pantallas: pocas vistas sugiere poca cobertura de la interfaz pedida.
-- **Tu resultado:** **26** vista(s)/componente(s) _(mínimo 6)_
+- **Tu resultado:** **36** vista(s)/componente(s) _(mínimo 6)_
 
 ## 5. Observaciones y qué falta
 
@@ -276,7 +278,14 @@ Cada aspecto indica **qué mide**, **por qué importa** y **tu resultado**. Cuan
 
 ## 7. Anexo: archivos donde se originan los problemas
 
-Se listan los archivos y líneas que el análisis marca para cada criterio en rojo. Para **duplicación** se muestran los archivos con más líneas repetidas; para **cobertura**, las unidades por debajo del umbral.
+Se listan **todos** los archivos y líneas que el análisis marca para cada criterio en rojo. Para **duplicación** se muestran los archivos con líneas repetidas; para **cobertura**, las unidades por debajo del umbral.
+
+**Resumen por archivo** — archivos con más hallazgos:
+
+| Archivo | Hallazgos | Peso total | Señales |
+|---|---:|---:|---|
+| `src/composables/useEmailVerification.js` | 2 | 9 | high_complexity, long_function |
+| `src/composables/useConversation.js` | 1 | 4 | long_function |
 
 **Endpoints del backend (EP)** — _sin archivo asociado (es un conteo)._
 
